@@ -1,6 +1,9 @@
 from .Source import Source
 from .Token import Token, Symbol, Type
+from Error import ErrorCode, LexerError
 
+MEX_IDENTIFIER_LENGHT = 100
+MAX_STRING_LENGHT = 500
 
 class Lexer:
     def __init__(self, filename):
@@ -21,21 +24,25 @@ class Lexer:
         while self.skip_comment() or self.skip_whitespace():
             pass
 
-        if self.try_build_eof():
-            return
-        elif self.try_build_identifier():
-            return
-        elif self.try_build_scalar():
-            return
-        elif self.try_build_special_character():
-            return
-        else:
-            self.token = Token(Type.UNIDENTIFIED, self.source.get_char())
-            self.source.get_next_char()
-            return
+        position = self.source.current_line, self.source.current_column
 
-        # elif self.try_double_operator():
-        #     return
+        if self.try_build_eof():
+            pass
+        elif self.try_build_identifier_or_reserved_word(position):
+            pass
+        elif self.try_build_string(position):
+            pass
+        elif self.try_build_scalar():
+            pass        
+        elif self.try_build_double_operator():
+            pass
+        elif self.try_build_special_character():
+            pass
+        else:
+            raise LexerError(ErrorCode.CANT_IDENTIFY_TOKEN, position)
+
+        self.token.set_position(position)
+
 
     def skip_comment(self):
         if self.source.current_char == '#':
@@ -56,47 +63,56 @@ class Lexer:
 
     def try_build_eof(self):
         if self.source.current_char == '':
-            self.token = Token(Type.EOF, '', self.source.current_line, self.source.current_column)
+            self.token = Token(Type.EOF, '')
             return True
         return False
 
 
-    def try_build_identifier(self):
+    def try_build_identifier_or_reserved_word(self, position):
         word = ''
-        position = self.source.current_line, self.source.current_column
         if self.source.current_char.isalpha():
             while self.source.current_char.isalpha() or self.source.current_char.isdigit() or self.source.current_char == '_':
                 word = word + self.source.current_char
+                if len(word) > MEX_IDENTIFIER_LENGHT:
+                    raise LexerError(ErrorCode.EXCEED_MAX_IDENTIFIER_LENGHT, position)
                 self.source.move_to_next_char()
-            if word in Symbol.special_words:
-                token_type = Symbol.special_words[word]
-                self.token = Token(token_type, word, position[0], position[1])
+            if word in Symbol.reserved_words:
+                token_type = Symbol.reserved_words[word]
+                self.token = Token(token_type, word)
                 return True
             else:
-                self.token = Token(Type.IDENTIFIER, word, position[0], position[1])
+                self.token = Token(Type.IDENTIFIER, word)
                 return True
         return False
 
 
     def try_build_scalar(self):
-        # TODO: Dodac obsluge minusow
-        if not self.source.current_char.isdigit():
+        if not self.source.current_char.isdigit() and not self.source.current_char == '-':
             return False
 
         buffer = ''
-        position = self.source.current_line, self.source.current_column
+        if self.source.current_char == '-':         # obsluga minusowych liczb
+            buffer = '-'
+            if not self.source.move_to_next_char().isdigit():
+                self.token = Token(Type.MINUS, value='-')
+                return True
 
         if self.source.current_char == '0':         # obsluga liczb zaczynajacych sie od zera
             buffer += '0'
             self.source.move_to_next_char()
-            return self.__check_dot(buffer, position)
+            while self.source.current_char == '0':  # ignorowanie nadmiarowych zer 
+                self.source.move_to_next_char()
+            self.__check_dot(buffer)
+            return True
 
         while self.source.current_char.isdigit():   # obsluga pozostalych liczb
             buffer += self.source.current_char
             self.source.move_to_next_char()
-        return self.__check_dot(buffer, position)
+        self.__check_dot(buffer)
+        return True
 
-    def __check_dot(self, buffer, position):
+
+    def __check_dot(self, buffer):
         if self.source.current_char == '.':
             buffer += self.source.current_char
             self.source.move_to_next_char()
@@ -105,11 +121,12 @@ class Lexer:
                     buffer += self.source.current_char
                     self.source.move_to_next_char()
 
-            self.token = Token(Type.SCALAR, float(buffer), position[0], position[1])
-            return True                     # to jest poprawna liczba z kropką - po kropce moze nic nie byc
+            self.token = Token(Type.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
+            return                     
 
-        self.token = Token(Type.SCALAR, int(buffer), position[0], position[1])
-        return True                         # to jest poprawna liczba bez kropki
+        self.token = Token(Type.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
+        return                         
+
 
     def try_build_special_character(self):
         if self.source.current_char in Symbol.special_characters:
@@ -120,3 +137,46 @@ class Lexer:
         return False
 
 
+    def try_build_double_operator(self):
+        first_char = self.source.current_char
+        if first_char == ">" or first_char == "<" or first_char == "=" or first_char == "!":
+            second_char = self.source.move_to_next_char()
+            if first_char + second_char in Symbol.double_operators:
+                token_type = Symbol.double_operators[first_char + second_char]
+                self.token = Token(token_type, first_char + second_char)
+                self.source.move_to_next_char()
+                return True
+            elif first_char in Symbol.special_characters:
+                token_type = Symbol.special_characters[first_char]
+                self.token = Token(token_type, first_char)
+                return True
+        return False
+
+
+    def try_build_string(self, position):
+        if self.source.current_char != '"':
+            return False
+
+        self.source.move_to_next_char()
+        chars = []
+        while self.source.current_char != '"':
+            if self.source.current_char == '':
+                raise LexerError(ErrorCode.STRING_BUILD_FAIL, position)
+
+            if len(chars) > MAX_STRING_LENGHT:
+                raise LexerError(ErrorCode.EXCEED_MAX_STRING_LENGHT, position)
+
+            if self.source.current_char == '\\':
+                self.source.move_to_next_char()
+                if self.source.current_char == '\\':
+                    chars.append('\\')
+                elif self.source.current_char == '"':
+                    chars.append('"')
+            else:
+                chars.append(self.source.current_char)
+            self.source.move_to_next_char()
+
+        self.source.move_to_next_char()
+
+        self.token = Token(Type.STRING, ''.join(chars))
+        return True

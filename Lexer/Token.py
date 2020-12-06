@@ -74,7 +74,7 @@ class Symbol:
         '!=': Type.NOT_EQUAL_TO
     }
 
-    special_words = {
+    reserved_words = {
         'and': Type.AND,
         'or': Type.OR,
         'var': Type.VAR_DECLARATION,
@@ -93,4 +93,8 @@ class Token:
         self.column = column
 
     def __repr__(self):
-        return f"{self.token_type}\t\tvalue={self.value}\t\tposition=({self.line}, {self.column})"
+        return f"{self.token_type}\t\tvalue='{self.value}'\t\tposition=({self.line}, {self.column})"
+
+    def set_position(self, position):
+        self.line = position[0]
+        self.column = position[1]
