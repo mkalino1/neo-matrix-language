@@ -1,5 +1,7 @@
 from Lexer.Lexer import Lexer
 
-lexer = Lexer(filename="data.txt")
 
-lexer.build_tokens()
+lexer_function = Lexer(filename="test_program.txt")
+
+for token in lexer_function.yield_tokens():
+    print(token)

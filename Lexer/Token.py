@@ -4,13 +4,11 @@ from enum import Enum, auto
 
 class Type(Enum):
     EOF = auto()
-    UNIDENTIFIED = auto()
     IDENTIFIER = auto()
     VAR_DECLARATION = auto()
 
     SCALAR = auto()
     BOOL = auto()
-    MATRIX = auto()
     STRING = auto()
 
     PLUS = auto()
@@ -18,8 +16,6 @@ class Type(Enum):
     MULTIPLY = auto()
     DIVIDE = auto()
     ASSIGN = auto()
-    EQUAL_TO = auto()
-    NOT_EQUAL_TO = auto()
 
     SEMICOLON = auto()
     COMMA = auto()
@@ -34,16 +30,19 @@ class Type(Enum):
     OP_ANGLE_BRACKET = auto()
     CL_ANGLE_BRACKET = auto()
 
-    LESS_THAN = auto()
-    GREATER_THAN = auto()
     LESS_OR_EQUAL_TO = auto()
     GREATER_OR_EQUAL_TO = auto()
+    EQUAL_TO = auto()
+    NOT_EQUAL_TO = auto()
 
     AND = auto()
     OR = auto()
     NOT = auto()
     FUNCTION = auto()
     RETURN = auto()
+    IF = auto()
+    ELSE = auto()
+    WHILE = auto()
 
 
 class Symbol:
@@ -63,7 +62,6 @@ class Symbol:
         ';': Type.SEMICOLON,
         ',': Type.COMMA,
         '.': Type.DOT,
-        '!': Type.NOT,
         '=': Type.ASSIGN
     }
 
@@ -77,16 +75,20 @@ class Symbol:
     reserved_words = {
         'and': Type.AND,
         'or': Type.OR,
+        'not': Type.NOT,
         'var': Type.VAR_DECLARATION,
         'true': Type.BOOL,
         'false': Type.BOOL,
         'return': Type.RETURN,
         'function': Type.FUNCTION,
+        'if': Type.IF,
+        'else': Type.ELSE,
+        'while': Type.WHILE
     }
 
 
 class Token:
-    def __init__(self, token_type=Type.IDENTIFIER, value="", line=None, column=None):
+    def __init__(self, token_type=None, value="", line=None, column=None):
         self.token_type = token_type
         self.value = value
         self.line = line

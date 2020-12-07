@@ -1,0 +1,5 @@
+# hello
+function funciette(true, "argi"){
+    var x = 4.5;
+    return x;
+}

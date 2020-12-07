@@ -11,12 +11,12 @@ class Lexer:
         self.token = None
 
 
-    def build_tokens(self):
+    def yield_tokens(self):
         eof_reached = False
         while(not eof_reached):
             self.build_next_token()
-            print(self.token)
-            if self.token != None and self.token.token_type == Type.EOF:
+            yield self.token
+            if self.token.token_type == Type.EOF:
                 eof_reached = True
 
 
@@ -42,23 +42,6 @@ class Lexer:
             raise LexerError(ErrorCode.CANT_IDENTIFY_TOKEN, position)
 
         self.token.set_position(position)
-
-
-    def skip_comment(self):
-        if self.source.current_char == '#':
-            while self.source.current_char != '\n' and self.source.current_char != '':
-                self.source.move_to_next_char()
-            self.source.move_to_next_char()
-            return True
-        return False
-
-
-    def skip_whitespace(self):
-        if self.source.current_char == ' ' or self.source.current_char == '\n':
-            while self.source.current_char == ' ' or self.source.current_char == '\n':
-                self.source.move_to_next_char()
-            return True
-        return False
 
 
     def try_build_eof(self):
@@ -102,24 +85,23 @@ class Lexer:
             self.source.move_to_next_char()
             while self.source.current_char == '0':  # ignorowanie nadmiarowych zer 
                 self.source.move_to_next_char()
-            self.__check_dot(buffer)
+            self.check_dot(buffer)
             return True
 
         while self.source.current_char.isdigit():   # obsluga pozostalych liczb
             buffer += self.source.current_char
             self.source.move_to_next_char()
-        self.__check_dot(buffer)
+        self.check_dot(buffer)
         return True
 
 
-    def __check_dot(self, buffer):
+    def check_dot(self, buffer):            # metoda pomocnicza
         if self.source.current_char == '.':
             buffer += self.source.current_char
             self.source.move_to_next_char()
-            if self.source.current_char.isdigit():
-                while self.source.current_char.isdigit():
-                    buffer += self.source.current_char
-                    self.source.move_to_next_char()
+            while self.source.current_char.isdigit():
+                buffer += self.source.current_char
+                self.source.move_to_next_char()
 
             self.token = Token(Type.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
             return                     
@@ -180,3 +162,20 @@ class Lexer:
 
         self.token = Token(Type.STRING, ''.join(chars))
         return True
+
+
+    def skip_comment(self):
+        if self.source.current_char == '#':
+            while self.source.current_char != '\n' and self.source.current_char != '':
+                self.source.move_to_next_char()
+            self.source.move_to_next_char()
+            return True
+        return False
+
+
+    def skip_whitespace(self):
+        if self.source.current_char == ' ' or self.source.current_char == '\n':
+            while self.source.current_char == ' ' or self.source.current_char == '\n':
+                self.source.move_to_next_char()
+            return True
+        return False
