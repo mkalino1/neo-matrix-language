@@ -2,22 +2,19 @@ from .Source import Source
 from .Token import Token, Symbol, Type
 from Error import ErrorCode, LexerError
 
-MEX_IDENTIFIER_LENGHT = 100
-MAX_STRING_LENGHT = 500
 
 class Lexer:
-    def __init__(self, filename):
+    def __init__(self, filename, MAX_IDENTIFIER_LENGHT = 100, MAX_STRING_LENGHT = 500):
         self.source = Source(filename)
         self.token = None
+        self.MAX_IDENTIFIER_LENGHT = MAX_IDENTIFIER_LENGHT
+        self.MAX_STRING_LENGHT = MAX_STRING_LENGHT
 
 
     def yield_tokens(self):
-        eof_reached = False
-        while(not eof_reached):
+        while(self.token == None or self.token.token_type != Type.EOF):
             self.build_next_token()
             yield self.token
-            if self.token.token_type == Type.EOF:
-                eof_reached = True
 
 
     def build_next_token(self):
@@ -52,13 +49,15 @@ class Lexer:
 
 
     def try_build_identifier_or_reserved_word(self, position):
-        word = ''
+        chars = []
         if self.source.current_char.isalpha():
             while self.source.current_char.isalpha() or self.source.current_char.isdigit() or self.source.current_char == '_':
-                word = word + self.source.current_char
-                if len(word) > MEX_IDENTIFIER_LENGHT:
+                if len(chars) >= self.MAX_IDENTIFIER_LENGHT:
                     raise LexerError(ErrorCode.EXCEED_MAX_IDENTIFIER_LENGHT, position)
+                chars.append(self.source.current_char)
                 self.source.move_to_next_char()
+                
+            word = ''.join(chars)    
             if word in Symbol.reserved_words:
                 token_type = Symbol.reserved_words[word]
                 self.token = Token(token_type, word)
@@ -68,34 +67,25 @@ class Lexer:
                 return True
         return False
 
-
     def try_build_scalar(self):
-        if not self.source.current_char.isdigit() and not self.source.current_char == '-':
+        if not self.source.current_char.isdigit():
             return False
 
         buffer = ''
-        if self.source.current_char == '-':         # obsluga minusowych liczb
-            buffer = '-'
-            if not self.source.move_to_next_char().isdigit():
-                self.token = Token(Type.MINUS, value='-')
-                return True
 
         if self.source.current_char == '0':         # obsluga liczb zaczynajacych sie od zera
             buffer += '0'
             self.source.move_to_next_char()
-            while self.source.current_char == '0':  # ignorowanie nadmiarowych zer 
+        else:
+            while self.source.current_char.isdigit():   # obsluga pozostalych liczb
+                buffer += self.source.current_char
                 self.source.move_to_next_char()
-            self.check_dot(buffer)
-            return True
 
-        while self.source.current_char.isdigit():   # obsluga pozostalych liczb
-            buffer += self.source.current_char
-            self.source.move_to_next_char()
         self.check_dot(buffer)
         return True
 
 
-    def check_dot(self, buffer):            # metoda pomocnicza
+    def check_dot(self, buffer):            # metoda pomocnicza obslugująca liczby z kropką
         if self.source.current_char == '.':
             buffer += self.source.current_char
             self.source.move_to_next_char()
@@ -105,8 +95,8 @@ class Lexer:
 
             self.token = Token(Type.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
             return                     
-
-        self.token = Token(Type.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
+        else:
+            self.token = Token(Type.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
         return                         
 
 
@@ -121,7 +111,7 @@ class Lexer:
 
     def try_build_double_operator(self):
         first_char = self.source.current_char
-        if first_char == ">" or first_char == "<" or first_char == "=" or first_char == "!":
+        if first_char in [x[0] for x in Symbol.double_operators]:
             second_char = self.source.move_to_next_char()
             if first_char + second_char in Symbol.double_operators:
                 token_type = Symbol.double_operators[first_char + second_char]
@@ -145,7 +135,7 @@ class Lexer:
             if self.source.current_char == '':
                 raise LexerError(ErrorCode.STRING_BUILD_FAIL, position)
 
-            if len(chars) > MAX_STRING_LENGHT:
+            if len(chars) > self.MAX_STRING_LENGHT:
                 raise LexerError(ErrorCode.EXCEED_MAX_STRING_LENGHT, position)
 
             if self.source.current_char == '\\':

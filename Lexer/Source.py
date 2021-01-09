@@ -9,7 +9,8 @@ class Source():
 
     def __del__(self):
         self.file.close()
-
+        
+    # ftell fseek
     def move_to_next_char(self):
         self.current_char = self.file.read(1)
 

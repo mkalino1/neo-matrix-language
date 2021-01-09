@@ -1,4 +1,3 @@
-# token.py
 from enum import Enum, auto
 
 

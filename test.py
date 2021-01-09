@@ -6,11 +6,11 @@ from Lexer.Token import Type
 lexer_values = Lexer(filename="test_values.txt")
 
 correct_scalars_zeros = [0, 0.0, 0.0, 0.0, 0.001, 0.4]
-correct_scalars_negative = [-12.34, 0, 0.0, -24]
 correct_strings = ['Kiedy powiem sobie "dosc"', 'Rozne znaki: %$#@,.()']
-correct_scalars = iter(correct_scalars_zeros + correct_scalars_negative + correct_strings + [''])
+correct_scalars = iter(correct_scalars_zeros + correct_strings + [''])
 
 for token in lexer_values.yield_tokens():
+    print(token.value)
     assert token.value == next(correct_scalars)
 
 
@@ -22,6 +22,7 @@ correct_booleans = [Type.BOOL, Type.BOOL]
 correct_scalars = iter(correct_doubles+ correct_booleans + [Type.EOF])
 
 for token in lexer_token_types.yield_tokens():
+    print(token.token_type)
     assert token.token_type == next(correct_scalars)
 
 
