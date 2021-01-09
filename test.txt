@@ -1,0 +1,13 @@
+function hej(raz, dwa, trzy){
+    if(3){
+        while (4){
+
+        }
+        while (5){
+            
+        }
+    }
+    else{
+
+    }
+}

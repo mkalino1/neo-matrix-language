@@ -1,7 +1,7 @@
 class Source():
     def __init__(self, filename):
         self.file = open(filename, 'r')
-
+        
         self.current_line = 1
         self.current_column = 0
         
