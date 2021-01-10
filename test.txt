@@ -10,3 +10,5 @@ function hej(raz, dwa, trzy){
 }
 
 x = [<1, 2, 3> <4, 5, 6>];
+y = 5;
+z = (true);

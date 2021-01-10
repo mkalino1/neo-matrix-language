@@ -9,6 +9,10 @@ class Parser:
         self.lexer = lexer
         self.lexer.build_next_token()
 
+    def consume(self):
+        prev_token = self.lexer.token
+        self.lexer.build_next_token()
+        return prev_token
 
     def expect(self, expected_token_type):
         if not self.check_type(expected_token_type):
@@ -19,7 +23,7 @@ class Parser:
                 self.lexer.token.value
             )
         prev_token = self.lexer.token
-        self.lexer.build_next_token()
+        self.consume()
         return prev_token
 
 
@@ -45,7 +49,7 @@ class Parser:
         """
         if not self.check_type(Type.FUNCTION):
             return None
-        self.lexer.build_next_token()
+        self.consume()
 
         function_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
 
@@ -66,7 +70,7 @@ class Parser:
             return []
         parameter_list = [Identifier(self.expect(Type.IDENTIFIER).value)]
         while self.check_type(Type.COMMA):
-            self.lexer.build_next_token()
+            self.consume()
             parameter_list.append(Identifier(self.expect(Type.IDENTIFIER).value))
 
         return parameter_list
@@ -80,14 +84,14 @@ class Parser:
             return []
         arguments_list = [self.parse_expression()]
         while self.check_type(Type.COMMA):
-            self.lexer.build_next_token()
+            self.consume()
             arguments_list.append(self.parse_expression())
 
         return arguments_list
 
 
     def try_parse_block(self):
-        if self.lexer.token.token_type != Type.OP_CURLY_BRACKET:
+        if not self.check_type(Type.OP_CURLY_BRACKET):
             return None
         return self.parse_block()
 
@@ -113,14 +117,28 @@ class Parser:
 
     def parse_instruction(self):
         """Specyfikacja składni:
-        Instruction = IfStatement | Loop | Assignment | FunctionCall | BlockInstruction | ReturnInstruction;
+        Instruction = IfStatement | Loop | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
         """
         if (block_trial := self.try_parse_block()): return block_trial
         if (if_trial := self.try_parse_if()): return if_trial
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
 
-        return self.parse_assignment_or_functioncall()
+        # w takim razie instrukcja musi zaczynać się identyfikatorem
+        first_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
+
+        # jesli wywołanie funkcji wystepuje jako samotna instrukcja to musi konczyc sie średnikiem
+        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): 
+            self.expect(Type.SEMICOLON)
+            return funcall_trial
+        if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
+
+        raise InvalidSyntax(
+            (self.lexer.token.line, self.lexer.token.column),
+            "equal sign or left round bracket",
+            self.lexer.token.token_type,
+            self.lexer.token.value
+        )
 
 
     def try_parse_if(self):
@@ -129,7 +147,7 @@ class Parser:
         """
         if not self.check_type(Type.IF):
             return None
-        self.lexer.build_next_token()
+        self.consume()
 
         self.expect(Type.OP_ROUND_BRACKET)
         condition_expression = self.parse_expression()
@@ -138,7 +156,7 @@ class Parser:
         main_block = self.parse_block()
         else_block = None
         if self.check_type(Type.ELSE):
-            self.lexer.build_next_token()
+            self.consume()
             else_block = self.parse_block()
 
         return IfStatement(condition_expression, main_block, else_block)
@@ -150,7 +168,7 @@ class Parser:
         """
         if not self.check_type(Type.WHILE):
             return None
-        self.lexer.build_next_token()
+        self.consume()
 
         self.expect(Type.OP_ROUND_BRACKET)
         condition_expression = self.parse_expression()
@@ -164,9 +182,9 @@ class Parser:
         """Specyfikacja składni:
         ReturnInstruction = ‘return’ [ Expression ] ‘;’ ;
         """
-        if self.lexer.token.token_type != Type.RETURN:
+        if not self.check_type(Type.RETURN):
             return None
-        self.lexer.build_next_token()
+        self.consume()
         expression = None
 
         if not self.check_type(Type.SEMICOLON):
@@ -176,42 +194,56 @@ class Parser:
         return Return(expression)
 
 
-    def parse_assignment_or_functioncall(self):
-        first_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
-        if not (self.check_type(Type.ASSIGN) or self.check_type(Type.OP_ROUND_BRACKET)):
-            raise InvalidSyntax(
-                position= (self.lexer.token.line, self.lexer.token.column),
-                expected_type="equal sign or left round bracket",
-                given_type= self.lexer.token.token_type,
-                given_value= self.lexer.token.value
-            )
+    def try_parse_functioncall_with_consumed_identifier(self, first_identifier):
+        """Specyfikacja składni:
+        FunctionCall = Identifier ‘(‘ [Arguments] ‘)’ ‘;’ ;
+        """
+        if not self.check_type(Type.OP_ROUND_BRACKET):
+            return None
+        self.consume()
+        arguments = self.parse_arguments()
+        self.expect(Type.CL_ROUND_BRACKET)
+        return FunctionCall(first_identifier, arguments)
 
-        # FunctionCall = Identifier ‘(‘ [Arguments] ‘)’ ‘;’ ;
-        if self.check_type(Type.OP_ROUND_BRACKET):
-            self.lexer.build_next_token()
-            arguments = self.parse_arguments()
-            self.expect(Type.CL_ROUND_BRACKET)
-            self.expect(Type.SEMICOLON)
-            return FunctionCall(first_identifier, arguments)
 
-        # Assignment = Identifier ‘=’ Expression ‘;’ ;
-        elif self.check_type(Type.ASSIGN):
-            self.lexer.build_next_token()
-            expression = self.parse_expression()
-            self.expect(Type.SEMICOLON)
-            return Assignment(first_identifier, expression)
-
+    def try_parse_assignment_with_consumed_identifier(self, first_identifier):
+        """Specyfikacja składni:
+        Assignment = Identifier ‘=’ Expression ‘;’ ;
+        """
+        if not self.check_type(Type.ASSIGN):
+            return None
+        self.consume()
+        expression = self.parse_expression()
+        self.expect(Type.SEMICOLON)
+        return Assignment(first_identifier, expression)
 
 
     def parse_expression(self):
 
+        if (brackets_trial := self.try_parse_expression_inside_brackets()): return brackets_trial
         if (matrix_trial := self.try_parse_matrix()): return matrix_trial
 
-        return Scalar(self.expect(Type.SCALAR).value)
+        if self.check_type(Type.BOOL): return Bool(self.consume().value)
+        if self.check_type(Type.STRING): return String(self.consume().value)
+        if self.check_type(Type.SCALAR): return Scalar(self.consume().value)
 
-        # TODO: Dokonczyc expression. Trzeba bedzie to jakos podzielic
-        
-        # if self.check_type(Type.SCALAR): return Scalar(self.expect(Type.SCALAR).value)
+
+        raise InvalidSyntax(
+            (self.lexer.token.line, self.lexer.token.column),
+            "something else",
+            self.lexer.token.token_type,
+            self.lexer.token.value
+        )
+
+
+    def try_parse_expression_inside_brackets(self):
+        if not self.check_type(Type.OP_ROUND_BRACKET):
+            return None
+        self.consume()
+
+        expression = self.parse_expression()
+        self.expect(Type.CL_ROUND_BRACKET)
+        return expression
 
 
     def try_parse_matrix(self):
@@ -220,7 +252,7 @@ class Parser:
         """
         if not self.check_type(Type.OP_SQUARE_BRACKET):
             return None
-        self.lexer.build_next_token()
+        self.consume()
 
         rows = []
         while not self.check_type(Type.CL_SQUARE_BRACKET):
@@ -251,8 +283,5 @@ class Parser:
         self.expect(Type.DOT)
         second_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
         return Property(first_identifier, second_identifier)
-        # if self.check_type(Type.DOT):
-        #     self.lexer.build_next_token()
-        #     second_identifier = self.expect(Type.IDENTIFIER).value
-        #     return Property(first_identifier, second_identifier)
+
 
