@@ -39,6 +39,16 @@ class Matrix():
         return f'{self.__class__.__name__}: {self.rows}'
 
 
+class Access():
+    def __init__(self, identifier, first, second):
+        self.identifier = identifier
+        self.first = first
+        self.second = second
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.first} {self.second}'
+
+
 class BinaryOperator():
     def __init__(self, lvalue, op, rvalue):
         self.lvalue = lvalue

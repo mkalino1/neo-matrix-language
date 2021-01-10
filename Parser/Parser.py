@@ -219,14 +219,22 @@ class Parser:
 
 
     def parse_expression(self):
+        """
+        expression     → literal
+                    | unary
+                    | binary
+                    | grouping ;
 
-        if (brackets_trial := self.try_parse_expression_inside_brackets()): return brackets_trial
-        if (matrix_trial := self.try_parse_matrix()): return matrix_trial
+        literal        → NUMBER | STRING | "true" | "false" | "nil" ;
+        grouping       → "(" expression ")" ;
+        unary          → ( "-" | "!" ) expression ;
+        binary         → expression operator expression ;
+        operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
+                    | "+"  | "-"  | "*" | "/" ;
+        """
 
-        if self.check_type(Type.BOOL): return Bool(self.consume().value)
-        if self.check_type(Type.STRING): return String(self.consume().value)
-        if self.check_type(Type.SCALAR): return Scalar(self.consume().value)
-
+        if (brackets_trial := self.try_parse_grouping_expression()): return brackets_trial
+        if (literal_trial := self.try_parse_literal()): return literal_trial
 
         raise InvalidSyntax(
             (self.lexer.token.line, self.lexer.token.column),
@@ -235,8 +243,21 @@ class Parser:
             self.lexer.token.value
         )
 
+    def try_parse_literal(self):
+        if self.check_type(Type.BOOL): return Bool(self.consume().value)
+        if self.check_type(Type.STRING): return String(self.consume().value)
+        if self.check_type(Type.SCALAR): return Scalar(self.consume().value)
+        if (matrix_trial := self.try_parse_matrix()): return matrix_trial
+        if self.check_type(Type.IDENTIFIER):
+            identifier = self.consume().value
+            if (property_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return property_trial
+            if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
+            if (access_trial := self.try_parse_access_with_consumed_identifier(identifier)): return access_trial
+            return Scalar(identifier)
+        return None
 
-    def try_parse_expression_inside_brackets(self):
+
+    def try_parse_grouping_expression(self):
         if not self.check_type(Type.OP_ROUND_BRACKET):
             return None
         self.consume()
@@ -275,13 +296,30 @@ class Parser:
         return scalars
 
 
-    def parse_property(self):            # TODO: Pomyslec co z tym
+    def try_parse_property_with_consumed_identifier(self, first_identifier):
         """Specyfikacja składni:
         Property = Identifier ‘.’ Identifier ‘;’ ;
         """
-        first_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
-        self.expect(Type.DOT)
+        if not self.check_type(Type.DOT):
+            return None
+        self.consume()
         second_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
         return Property(first_identifier, second_identifier)
+
+
+    def try_parse_access_with_consumed_identifier(self, identifier):
+        """Specyfikacja składni:
+        MatrixAccess = Identifier ‘[‘ Scalar ‘]’ ‘[‘ Scalar ‘]’
+        """
+        if not self.check_type(Type.OP_SQUARE_BRACKET):
+            return None
+        self.consume()
+        first_expression = self.parse_expression()
+        self.expect(Type.CL_SQUARE_BRACKET)
+
+        self.expect(Type.OP_SQUARE_BRACKET)
+        second_expression = self.parse_expression()
+        self.expect(Type.CL_SQUARE_BRACKET)
+        return Access(identifier, first_expression, second_expression)
 
 
