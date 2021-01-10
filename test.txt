@@ -1,13 +1,12 @@
 function hej(raz, dwa, trzy){
     if(3){
         while (4){
-
-        }
-        while (5){
-            
+            add(4);
         }
     }
     else{
 
     }
 }
+
+x = [<1, 2, 3> <4, 5, 6>];

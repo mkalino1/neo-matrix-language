@@ -13,6 +13,7 @@ class Identifier():
     def __repr__(self):
         return f'{self.name}'
 
+
 class Function():
     def __init__(self, id, parameter_list, block):
         self.id = id
@@ -58,10 +59,22 @@ class WhileLoop():
         return f'{self.__class__.__name__}: {self.condition} {self.block}'
 
 
-class Scalar():
-    def __init__(self, value):
-        self.value = value
+class Assignment():
+    def __init__(self, left_identifier, right_expression):
+        self.left_identifier = left_identifier
+        self.right_expression = right_expression
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.value}'
+        return f'{self.__class__.__name__}: {self.left_identifier} {self.right_expression}'
+
+
+class FunctionCall():
+    def __init__(self, function_name, arguments_list):
+        self.function_name = function_name
+        self.arguments = arguments_list
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.function_name} {self.arguments}'
+
+
 
