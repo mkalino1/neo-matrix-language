@@ -124,7 +124,7 @@ class Parser:
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
 
-        # w takim razie instrukcja musi zaczynać się identyfikatorem
+        # w takim razie instrukcja powinna zaczynać się identyfikatorem
         first_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
 
         # jesli wywołanie funkcji wystepuje jako samotna instrukcja to musi konczyc sie średnikiem
@@ -233,7 +233,7 @@ class Parser:
                     | "+"  | "-"  | "*" | "/" ;
         """
 
-        if (brackets_trial := self.try_parse_grouping_expression()): return brackets_trial
+        if (grouping_trial := self.try_parse_grouping()): return grouping_trial
         if (literal_trial := self.try_parse_literal()): return literal_trial
 
         raise InvalidSyntax(
@@ -243,7 +243,11 @@ class Parser:
             self.lexer.token.value
         )
 
+    # TODO: pomyslec czy nie lepiej dac factor zamiast literal
     def try_parse_literal(self):
+        """Specyfikacja składni:
+        Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
+        """
         if self.check_type(Type.BOOL): return Bool(self.consume().value)
         if self.check_type(Type.STRING): return String(self.consume().value)
         if self.check_type(Type.SCALAR): return Scalar(self.consume().value)
@@ -253,15 +257,17 @@ class Parser:
             if (property_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return property_trial
             if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
             if (access_trial := self.try_parse_access_with_consumed_identifier(identifier)): return access_trial
-            return Scalar(identifier)
+            return Identifier(identifier)
         return None
 
 
-    def try_parse_grouping_expression(self):
+    def try_parse_grouping(self):
+        """Specyfikacja składni:
+        Grouping = ‘(’ Expression ‘)’
+        """
         if not self.check_type(Type.OP_ROUND_BRACKET):
             return None
         self.consume()
-
         expression = self.parse_expression()
         self.expect(Type.CL_ROUND_BRACKET)
         return expression
@@ -273,12 +279,17 @@ class Parser:
         """
         if not self.check_type(Type.OP_SQUARE_BRACKET):
             return None
-        self.consume()
+        first_token_of_matrix = self.consume()
 
         rows = []
         while not self.check_type(Type.CL_SQUARE_BRACKET):
             rows.append(self.parse_matrix_row())
         self.expect(Type.CL_SQUARE_BRACKET)
+
+        # jesli wszystkie wiersze nie maja równych długości
+        if len([None for row in rows if len(row)==len(rows[0])]) != len(rows):
+            raise InvalidMatrix((first_token_of_matrix.line, first_token_of_matrix.column))
+
         return Matrix(rows)
 
 
