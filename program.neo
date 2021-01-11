@@ -6,15 +6,5 @@ function hej(raz, dwa, trzy){
     }
 }
 
-# Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
-
-# a = [<1, 2><4, 5>];
-# b = 5;
-# c = (true);
-# d = "Hello";
-# e = myfun("argument");
-# f = obj.method;
-# g = matrix[3][4];
-# h = some_variable;
 
 x = (2 < 3 == 3 < 4);

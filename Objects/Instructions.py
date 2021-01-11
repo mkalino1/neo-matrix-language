@@ -51,8 +51,8 @@ class FunctionCall():
 
 class Assignment():
     def __init__(self, left_identifier, right_expression):
-        self.left_identifier = left_identifier
-        self.right_expression = right_expression
+        self.identifier = left_identifier
+        self.expression = right_expression
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.left_identifier} {self.right_expression}'
+        return f'{self.__class__.__name__}: {self.identifier} {self.expression}'

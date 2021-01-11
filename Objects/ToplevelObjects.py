@@ -14,12 +14,12 @@ class Program():
 
 
 class Function():
-    def __init__(self, id, parameter_list, block):
-        self.id = id
+    def __init__(self, name, parameter_list, block):
+        self.name = name
         self.parameter_list = parameter_list
         self.block = block
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.id.name} {self.parameter_list} {self.block}'
+        return f'{self.__class__.__name__}: {self.name} {self.parameter_list} {self.block}'
 
 

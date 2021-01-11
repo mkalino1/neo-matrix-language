@@ -297,7 +297,7 @@ class Parser:
         Unary          = ( "not" | "-" ) Unary | Primary ;
         """
         if self.check_type(Type.NOT) or self.check_type(Type.MINUS):
-            op = self.consume()
+            op = self.consume().token_type
             right = self.parse_unary()
             return UnaryOperator(op, right)
         return self.parse_primary()
