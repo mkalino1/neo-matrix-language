@@ -17,6 +17,10 @@ class Parser:
         return prev_token
 
 
+    def check_type(self, token_type):
+        return self.lexer.token.token_type == token_type
+
+
     def expect(self, expected_token_type):
         if not self.check_type(expected_token_type):
             raise InvalidSyntax(
@@ -25,13 +29,7 @@ class Parser:
                 self.lexer.token.token_type,
                 self.lexer.token.value
             )
-        prev_token = self.lexer.token
-        self.consume()
-        return prev_token
-
-
-    def check_type(self, token_type):
-        return self.lexer.token.token_type == token_type
+        return self.consume()
 
 
     def parse_program(self):
