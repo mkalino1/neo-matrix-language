@@ -1,8 +1,7 @@
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
 
-
-lexer = Lexer(filename="test.txt")
+lexer = Lexer(filename="program.neo")
 parser = Parser(lexer)
 
 parsed_program = parser.parse_program()

@@ -1,3 +1,36 @@
+"""
+Klasy obiektów reprezentujacych expression
+
+    Expression     = Equality ( ( "and" | "or" ) Equality )*;
+    Equality       = Comparison ( "==" Comparison )* ;
+    Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
+    Term           = Factor ( ( "-" | "+" ) Factor )* ;
+    Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+    Unary          = ( "not" | "-" ) Unary | Primary ;
+    Primary        = Literal | "(" Expression ")" ; 
+    Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
+
+"""
+
+class BinaryOperator():
+    def __init__(self, lvalue, op, rvalue):
+        self.lvalue = lvalue
+        self.op = op
+        self.rvalue = rvalue
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.op} < {self.lvalue} {self.rvalue} >'
+
+
+class UnaryOperator():
+    def __init__(self, op, rvalue):
+        self.op = op
+        self.rvalue = rvalue
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.op} < {self.rvalue} >'
+
+
 class Scalar():
     def __init__(self, value):
         self.value = value
@@ -49,11 +82,9 @@ class Access():
         return f'{self.__class__.__name__}: {self.first} {self.second}'
 
 
-class BinaryOperator():
-    def __init__(self, lvalue, op, rvalue):
-        self.lvalue = lvalue
-        self.op = op
-        self.rvalue = rvalue
+class Identifier():
+    def __init__(self, string):
+        self.name = string
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.op.value}'
+        return f'{self.name}'

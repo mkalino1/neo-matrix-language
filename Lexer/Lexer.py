@@ -1,6 +1,6 @@
 from .Source import Source
 from .Token import Token, Symbol, Type
-from Error import ErrorCode, LexerError
+from Errors.LexerExceptions import ErrorCode, LexerError
 
 
 class Lexer:

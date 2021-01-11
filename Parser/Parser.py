@@ -1,18 +1,21 @@
-from Objects.Expressions import *
 from Objects.ToplevelObjects import *
+from Objects.Instructions import *
+from Objects.Expressions import *
 from Lexer.Token import Type
 from Lexer.Lexer import Lexer
-from Exceptions import *
+from Errors.ParserExceptions import *
 
 class Parser:
     def __init__(self, lexer:Lexer):
         self.lexer = lexer
         self.lexer.build_next_token()
 
+
     def consume(self):
         prev_token = self.lexer.token
         self.lexer.build_next_token()
         return prev_token
+
 
     def expect(self, expected_token_type):
         if not self.check_type(expected_token_type):
@@ -32,7 +35,7 @@ class Parser:
 
 
     def parse_program(self):
-        """Specyfikacja składni:
+        """
         Program = { FunctionDefinition | Instruction } ;
         """
         toplevel_objects = []
@@ -44,7 +47,7 @@ class Parser:
 
 
     def try_parse_function(self):
-        """Specyfikacja składni:
+        """
         FunctionDefinition = ‘function’ Identifier ‘(‘ [Parameters] ‘)’ BlockInstruction ;
         """
         if not self.check_type(Type.FUNCTION):
@@ -58,12 +61,11 @@ class Parser:
         self.expect(Type.CL_ROUND_BRACKET)
 
         function_block = self.parse_block()
-
         return Function(function_identifier, parameter_list, function_block)
 
 
     def parse_parameters(self):
-        """Specyfikacja składni:
+        """
         Parameters = { Identifier { ‘,’ Identifier } } ;
         """
         if self.check_type(Type.CL_ROUND_BRACKET):
@@ -77,7 +79,7 @@ class Parser:
 
 
     def parse_arguments(self):
-        """Specyfikacja składni:
+        """
         Arguments = { Expression { ‘,’ Expression } };
         """
         if self.check_type(Type.CL_ROUND_BRACKET):
@@ -97,7 +99,7 @@ class Parser:
 
 
     def parse_block(self):
-        """Specyfikacja składni:
+        """
         BlockInstruction = ‘{‘ {Instruction} ‘}’
         """
         self.expect(Type.OP_CURLY_BRACKET)
@@ -116,7 +118,7 @@ class Parser:
 
 
     def parse_instruction(self):
-        """Specyfikacja składni:
+        """
         Instruction = IfStatement | Loop | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
         """
         if (block_trial := self.try_parse_block()): return block_trial
@@ -142,7 +144,7 @@ class Parser:
 
 
     def try_parse_if(self):
-        """Specyfikacja składni:
+        """
         IfStatement = ‘if’ ‘(‘ Expression ‘)’ BlockInstruction [‘else’ BlockInstruction] ;
         """
         if not self.check_type(Type.IF):
@@ -163,7 +165,7 @@ class Parser:
 
 
     def try_parse_while(self):
-        """Specyfikacja składni:
+        """
         Loop = ‘while’ ‘(‘ Expression ‘)’ BlockInstruction ;
         """
         if not self.check_type(Type.WHILE):
@@ -179,7 +181,7 @@ class Parser:
 
 
     def try_parse_return(self):
-        """Specyfikacja składni:
+        """
         ReturnInstruction = ‘return’ [ Expression ] ‘;’ ;
         """
         if not self.check_type(Type.RETURN):
@@ -195,7 +197,7 @@ class Parser:
 
 
     def try_parse_functioncall_with_consumed_identifier(self, first_identifier):
-        """Specyfikacja składni:
+        """
         FunctionCall = Identifier ‘(‘ [Arguments] ‘)’ ‘;’ ;
         """
         if not self.check_type(Type.OP_ROUND_BRACKET):
@@ -207,7 +209,7 @@ class Parser:
 
 
     def try_parse_assignment_with_consumed_identifier(self, first_identifier):
-        """Specyfikacja składni:
+        """
         Assignment = Identifier ‘=’ Expression ‘;’ ;
         """
         if not self.check_type(Type.ASSIGN):
@@ -220,32 +222,104 @@ class Parser:
 
     def parse_expression(self):
         """
-        expression     → literal
-                    | unary
-                    | binary
-                    | grouping ;
-
-        literal        → NUMBER | STRING | "true" | "false" | "nil" ;
-        grouping       → "(" expression ")" ;
-        unary          → ( "-" | "!" ) expression ;
-        binary         → expression operator expression ;
-        operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
-                    | "+"  | "-"  | "*" | "/" ;
+        Expression     = Equality ( ( "and" | "or" ) Equality )*;
+        Equality       = Comparison ( "==" Comparison )* ;
+        Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
+        Term           = Factor ( ( "-" | "+" ) Factor )* ;
+        Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+        Unary          = ( "not" | "-" ) Unary | Primary ;
+        Primary        = Literal | "(" Expression ")" ; 
+        Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
         """
+        l_expression = self.parse_equality()
 
+        while self.check_type(Type.AND) or self.check_type(Type.OR):
+            op = self.consume().token_type
+            r_expression = self.parse_equality()
+            l_expression = BinaryOperator(l_expression, op, r_expression)
+        return l_expression
+
+
+    def parse_equality(self):
+        """
+        Equality       = Comparison ( "==" Comparison )* ;
+        """
+        l_expression = self.parse_comparison()
+
+        while self.check_type(Type.EQUAL_TO):
+            op = self.consume().token_type
+            r_expression = self.parse_comparison()
+            l_expression = BinaryOperator(l_expression, op, r_expression)
+        return l_expression
+
+
+    def parse_comparison(self):
+        """
+        Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
+        """
+        l_expression = self.parse_term()
+
+        while self.check_type(Type.LESS_OR_EQUAL_TO) or self.check_type(Type.GREATER_OR_EQUAL_TO) or self.check_type(Type.CL_ANGLE_BRACKET) or self.check_type(Type.OP_ANGLE_BRACKET):
+            op = self.consume().token_type
+            r_expression = self.parse_term()
+            l_expression = BinaryOperator(l_expression, op, r_expression)
+        return l_expression
+
+
+    def parse_term(self):
+        """
+        Term           = Factor ( ( "-" | "+" ) Factor )* ;
+        """
+        l_expression = self.parse_factor()
+
+        while self.check_type(Type.PLUS) or self.check_type(Type.MINUS):
+            op = self.consume().token_type
+            r_expression = self.parse_factor()
+            l_expression = BinaryOperator(l_expression, op, r_expression)
+        return l_expression
+
+
+    def parse_factor(self):
+        """
+        Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+        """
+        l_expression = self.parse_unary()
+
+        while self.check_type(Type.DIVIDE) or self.check_type(Type.MULTIPLY):
+            op = self.consume().token_type
+            r_expression = self.parse_unary()
+            l_expression = BinaryOperator(l_expression, op, r_expression)
+        return l_expression
+        
+
+    def parse_unary(self):
+        """
+        Unary          = ( "not" | "-" ) Unary | Primary ;
+        """
+        if self.check_type(Type.NOT) or self.check_type(Type.MINUS):
+            op = self.consume()
+            right = self.parse_unary()
+            return UnaryOperator(op, right)
+        return self.parse_primary()
+
+
+    def parse_primary(self):
+        """
+        Primary        = Literal | "(" Expression ")" ; 
+        """
         if (grouping_trial := self.try_parse_grouping()): return grouping_trial
         if (literal_trial := self.try_parse_literal()): return literal_trial
 
         raise InvalidSyntax(
             (self.lexer.token.line, self.lexer.token.column),
-            "something else",
+            "literal or grouping",
             self.lexer.token.token_type,
             self.lexer.token.value
         )
 
-    # TODO: pomyslec czy nie lepiej dac factor zamiast literal
+
     def try_parse_literal(self):
-        """Specyfikacja składni:
+        """
         Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
         """
         if self.check_type(Type.BOOL): return Bool(self.consume().value)
@@ -262,7 +336,7 @@ class Parser:
 
 
     def try_parse_grouping(self):
-        """Specyfikacja składni:
+        """
         Grouping = ‘(’ Expression ‘)’
         """
         if not self.check_type(Type.OP_ROUND_BRACKET):
@@ -274,7 +348,7 @@ class Parser:
 
 
     def try_parse_matrix(self):
-        """Specyfikacja składni:
+        """
         Matrix = ‘[‘ {MatrixRow} ‘]’ ;
         """
         if not self.check_type(Type.OP_SQUARE_BRACKET):
@@ -289,12 +363,11 @@ class Parser:
         # jesli wszystkie wiersze nie maja równych długości
         if len([None for row in rows if len(row)==len(rows[0])]) != len(rows):
             raise InvalidMatrix((first_token_of_matrix.line, first_token_of_matrix.column))
-
         return Matrix(rows)
 
 
     def parse_matrix_row(self):
-        """Specyfikacja składni:
+        """
         MatrixRow = ‘<’ Scalar {‘,’ Scalar } ‘>’ ;
         """
         self.expect(Type.OP_ANGLE_BRACKET)
@@ -308,7 +381,7 @@ class Parser:
 
 
     def try_parse_property_with_consumed_identifier(self, first_identifier):
-        """Specyfikacja składni:
+        """
         Property = Identifier ‘.’ Identifier ‘;’ ;
         """
         if not self.check_type(Type.DOT):
@@ -319,7 +392,7 @@ class Parser:
 
 
     def try_parse_access_with_consumed_identifier(self, identifier):
-        """Specyfikacja składni:
+        """
         MatrixAccess = Identifier ‘[‘ Scalar ‘]’ ‘[‘ Scalar ‘]’
         """
         if not self.check_type(Type.OP_SQUARE_BRACKET):
@@ -332,5 +405,3 @@ class Parser:
         second_expression = self.parse_expression()
         self.expect(Type.CL_SQUARE_BRACKET)
         return Access(identifier, first_expression, second_expression)
-
-
