@@ -10,6 +10,7 @@ from .Node import Node
 class Block(Node):
     def __init__(self, instructions):
         self.instructions = instructions
+        self.local_variables = {}
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.instructions}'
@@ -56,6 +57,9 @@ class FunctionCall(Node):
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.function_name} {self.arguments}'
 
+    def accept(self, visitor):
+        return visitor.visit_function_call(self)
+
 
 class Assignment(Node):
     def __init__(self, left_identifier, right_expression):
@@ -64,3 +68,6 @@ class Assignment(Node):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.identifier} {self.expression}'
+
+    def accept(self, visitor):
+        return visitor.visit_assignment(self)

@@ -233,7 +233,7 @@ class Parser:
         l_expression = self.parse_equality()
 
         while self.check_type(TokenType.AND) or self.check_type(TokenType.OR):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             r_expression = self.parse_equality()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -246,7 +246,7 @@ class Parser:
         l_expression = self.parse_comparison()
 
         while self.check_type(TokenType.EQUAL_TO) or self.check_type(TokenType.NOT_EQUAL_TO):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             r_expression = self.parse_comparison()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -259,7 +259,7 @@ class Parser:
         l_expression = self.parse_term()
 
         while self.check_type(TokenType.LESS_OR_EQUAL_TO) or self.check_type(TokenType.GREATER_OR_EQUAL_TO) or self.check_type(TokenType.CL_ANGLE_BRACKET) or self.check_type(TokenType.OP_ANGLE_BRACKET):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             r_expression = self.parse_term()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -272,7 +272,7 @@ class Parser:
         l_expression = self.parse_factor()
 
         while self.check_type(TokenType.PLUS) or self.check_type(TokenType.MINUS):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             r_expression = self.parse_factor()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -285,7 +285,7 @@ class Parser:
         l_expression = self.parse_unary()
 
         while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.MULTIPLY):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             r_expression = self.parse_unary()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -296,7 +296,7 @@ class Parser:
         Unary          = ( "not" | "-" ) Unary | Primary ;
         """
         if self.check_type(TokenType.NOT) or self.check_type(TokenType.MINUS):
-            op = to_operator[self.consume().value]
+            op = to_operator_type[self.consume().value]
             right = self.parse_unary()
             return UnaryOperator(op, right)
         return self.parse_primary()

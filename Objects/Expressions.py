@@ -47,15 +47,18 @@ class Scalar(Node):
         return f'{self.__class__.__name__}: {self.value}'
 
     def accept(self, visitor):
-        return visitor.visit_scalar(self)
+        return visitor.visit_literal(self)
 
 
 class Bool(Node):
     def __init__(self, value):
-        self.value = value
+        self.value = value == "true"
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.value}'
+
+    def accept(self, visitor):
+        return visitor.visit_literal(self)
 
 
 class String(Node):
@@ -64,6 +67,9 @@ class String(Node):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.value}'
+
+    def accept(self, visitor):
+        return visitor.visit_literal(self)
 
 
 class Property(Node):
@@ -95,7 +101,10 @@ class Access(Node):
 
 class Identifier(Node):
     def __init__(self, string):
-        self.name = string
+        self.value = string
 
     def __repr__(self):
-        return f'{self.name}'
+        return f'{self.value}'
+
+    def accept(self, visitor):
+        return visitor.visit_identifier(self)

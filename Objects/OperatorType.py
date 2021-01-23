@@ -20,7 +20,7 @@ class OperatorType(Enum):
     NOT = auto()
 
 
-to_operator = {
+to_operator_type = {
     '<=': OperatorType.LESS_OR_EQUAL,
     '>=': OperatorType.GREATER_OR_EQUAL,
     '<': OperatorType.LESS,
