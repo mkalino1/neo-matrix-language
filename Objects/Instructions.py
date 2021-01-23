@@ -5,15 +5,20 @@ Klasy obiektów reprezentujacych instukcje
     
 """
 
-class Block():
+from .Node import Node
+
+class Block(Node):
     def __init__(self, instructions):
         self.instructions = instructions
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.instructions}'
 
+    def accept(self, visitor):
+        return visitor.visit_block(self)
 
-class IfStatement():
+
+class IfStatement(Node):
     def __init__(self, condition, block, else_block):
         self.condition = condition
         self.block = block
@@ -23,15 +28,18 @@ class IfStatement():
         return f'{self.__class__.__name__}: {self.condition} {self.block} {self.else_block}'
 
 
-class Return():
+class Return(Node):
     def __init__(self, expression):
         self.expression = expression
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.expression}'
 
+    def accept(self, visitor):
+        return visitor.visit_return(self)
 
-class WhileLoop():
+
+class WhileLoop(Node):
     def __init__(self, condition, block):
         self.condition = condition
         self.block = block
@@ -40,7 +48,7 @@ class WhileLoop():
         return f'{self.__class__.__name__}: {self.condition} {self.block}'
 
 
-class FunctionCall():
+class FunctionCall(Node):
     def __init__(self, function_name, arguments_list):
         self.function_name = function_name
         self.arguments = arguments_list
@@ -49,7 +57,7 @@ class FunctionCall():
         return f'{self.__class__.__name__}: {self.function_name} {self.arguments}'
 
 
-class Assignment():
+class Assignment(Node):
     def __init__(self, left_identifier, right_expression):
         self.identifier = left_identifier
         self.expression = right_expression

@@ -1,7 +1,8 @@
 from Objects.ToplevelObjects import *
 from Objects.Instructions import *
 from Objects.Expressions import *
-from Lexer.Token import Type
+from Objects.OperatorType import *
+from Lexer.Token import TokenType
 from Lexer.Lexer import Lexer
 from Errors.ParserExceptions import *
 
@@ -40,7 +41,7 @@ class Parser:
         while (object := self.try_parse_function()) or (object := self.try_parse_instruction()):
             toplevel_objects.append(object)
 
-        self.expect(Type.EOF)
+        self.expect(TokenType.EOF)
         return Program(toplevel_objects)
 
 
@@ -48,15 +49,15 @@ class Parser:
         """
         FunctionDefinition = ‘function’ Identifier ‘(‘ [Parameters] ‘)’ BlockInstruction ;
         """
-        if not self.check_type(Type.FUNCTION):
+        if not self.check_type(TokenType.FUNCTION):
             return None
         self.consume()
 
-        function_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
+        function_identifier = Identifier(self.expect(TokenType.IDENTIFIER).value)
 
-        self.expect(Type.OP_ROUND_BRACKET)
+        self.expect(TokenType.OP_ROUND_BRACKET)
         parameter_list = self.parse_parameters()
-        self.expect(Type.CL_ROUND_BRACKET)
+        self.expect(TokenType.CL_ROUND_BRACKET)
 
         function_block = self.parse_block()
         return Function(function_identifier, parameter_list, function_block)
@@ -64,26 +65,26 @@ class Parser:
 
     def parse_parameters(self):
         """
-        Parameters = { Identifier { ‘,’ Identifier } } ;
+        Parameters = [ Identifier { ‘,’ Identifier } ] ;
         """
-        if self.check_type(Type.CL_ROUND_BRACKET):
+        if not self.check_type(TokenType.IDENTIFIER):
             return []
-        parameter_list = [Identifier(self.expect(Type.IDENTIFIER).value)]
-        while self.check_type(Type.COMMA):
+        parameter_list = [Identifier(self.expect(TokenType.IDENTIFIER).value)]
+        while self.check_type(TokenType.COMMA):
             self.consume()
-            parameter_list.append(Identifier(self.expect(Type.IDENTIFIER).value))
+            parameter_list.append(Identifier(self.expect(TokenType.IDENTIFIER).value))
 
         return parameter_list
 
 
     def parse_arguments(self):
         """
-        Arguments = { Expression { ‘,’ Expression } };
+        Arguments = [ Expression { ‘,’ Expression } ];
         """
-        if self.check_type(Type.CL_ROUND_BRACKET):
+        if self.check_type(TokenType.CL_ROUND_BRACKET):
             return []
         arguments_list = [self.parse_expression()]
-        while self.check_type(Type.COMMA):
+        while self.check_type(TokenType.COMMA):
             self.consume()
             arguments_list.append(self.parse_expression())
 
@@ -91,7 +92,7 @@ class Parser:
 
 
     def try_parse_block(self):
-        if not self.check_type(Type.OP_CURLY_BRACKET):
+        if not self.check_type(TokenType.OP_CURLY_BRACKET):
             return None
         return self.parse_block()
 
@@ -100,16 +101,16 @@ class Parser:
         """
         BlockInstruction = ‘{‘ {Instruction} ‘}’
         """
-        self.expect(Type.OP_CURLY_BRACKET)
+        self.expect(TokenType.OP_CURLY_BRACKET)
         instructions = []
-        while not self.check_type(Type.CL_CURLY_BRACKET):
+        while not self.check_type(TokenType.CL_CURLY_BRACKET):
             instructions.append(self.parse_instruction())
-        self.expect(Type.CL_CURLY_BRACKET)
+        self.expect(TokenType.CL_CURLY_BRACKET)
         return Block(instructions)
 
 
     def try_parse_instruction(self):
-        types_to_check = [Type.IF, Type.WHILE, Type.OP_CURLY_BRACKET, Type.RETURN, Type.IDENTIFIER]
+        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER]
         if any([self.check_type(t) for t in types_to_check]):
             return self.parse_instruction()
         return None
@@ -125,11 +126,11 @@ class Parser:
         if (return_trial := self.try_parse_return()): return return_trial
 
         # w takim razie instrukcja powinna zaczynać się identyfikatorem
-        first_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
+        first_identifier = Identifier(self.expect(TokenType.IDENTIFIER).value)
 
         # jesli wywołanie funkcji wystepuje jako samotna instrukcja to musi konczyc sie średnikiem
         if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): 
-            self.expect(Type.SEMICOLON)
+            self.expect(TokenType.SEMICOLON)
             return funcall_trial
         if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
 
@@ -145,17 +146,17 @@ class Parser:
         """
         IfStatement = ‘if’ ‘(‘ Expression ‘)’ BlockInstruction [‘else’ BlockInstruction] ;
         """
-        if not self.check_type(Type.IF):
+        if not self.check_type(TokenType.IF):
             return None
         self.consume()
 
-        self.expect(Type.OP_ROUND_BRACKET)
+        self.expect(TokenType.OP_ROUND_BRACKET)
         condition_expression = self.parse_expression()
-        self.expect(Type.CL_ROUND_BRACKET)
+        self.expect(TokenType.CL_ROUND_BRACKET)
 
         main_block = self.parse_block()
         else_block = None
-        if self.check_type(Type.ELSE):
+        if self.check_type(TokenType.ELSE):
             self.consume()
             else_block = self.parse_block()
 
@@ -166,13 +167,13 @@ class Parser:
         """
         Loop = ‘while’ ‘(‘ Expression ‘)’ BlockInstruction ;
         """
-        if not self.check_type(Type.WHILE):
+        if not self.check_type(TokenType.WHILE):
             return None
         self.consume()
 
-        self.expect(Type.OP_ROUND_BRACKET)
+        self.expect(TokenType.OP_ROUND_BRACKET)
         condition_expression = self.parse_expression()
-        self.expect(Type.CL_ROUND_BRACKET)
+        self.expect(TokenType.CL_ROUND_BRACKET)
 
         block = self.parse_block()
         return WhileLoop(condition_expression, block)
@@ -182,15 +183,15 @@ class Parser:
         """
         ReturnInstruction = ‘return’ [ Expression ] ‘;’ ;
         """
-        if not self.check_type(Type.RETURN):
+        if not self.check_type(TokenType.RETURN):
             return None
         self.consume()
         expression = None
 
-        if not self.check_type(Type.SEMICOLON):
+        if not self.check_type(TokenType.SEMICOLON):
             expression = self.parse_expression()
 
-        self.expect(Type.SEMICOLON)
+        self.expect(TokenType.SEMICOLON)
         return Return(expression)
 
 
@@ -198,11 +199,11 @@ class Parser:
         """
         FunctionCall = Identifier ‘(‘ [Arguments] ‘)’ ‘;’ ;
         """
-        if not self.check_type(Type.OP_ROUND_BRACKET):
+        if not self.check_type(TokenType.OP_ROUND_BRACKET):
             return None
         self.consume()
         arguments = self.parse_arguments()
-        self.expect(Type.CL_ROUND_BRACKET)
+        self.expect(TokenType.CL_ROUND_BRACKET)
         return FunctionCall(first_identifier, arguments)
 
 
@@ -210,11 +211,11 @@ class Parser:
         """
         Assignment = Identifier ‘=’ Expression ‘;’ ;
         """
-        if not self.check_type(Type.ASSIGN):
+        if not self.check_type(TokenType.ASSIGN):
             return None
         self.consume()
         expression = self.parse_expression()
-        self.expect(Type.SEMICOLON)
+        self.expect(TokenType.SEMICOLON)
         return Assignment(first_identifier, expression)
 
 
@@ -231,8 +232,8 @@ class Parser:
         """
         l_expression = self.parse_equality()
 
-        while self.check_type(Type.AND) or self.check_type(Type.OR):
-            op = self.consume().token_type
+        while self.check_type(TokenType.AND) or self.check_type(TokenType.OR):
+            op = to_operator[self.consume().value]
             r_expression = self.parse_equality()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -240,12 +241,12 @@ class Parser:
 
     def parse_equality(self):
         """
-        Equality       = Comparison ( "==" Comparison )* ;
+        Equality       = Comparison ( ("==" | "!=") Comparison )* ;
         """
         l_expression = self.parse_comparison()
 
-        while self.check_type(Type.EQUAL_TO):
-            op = self.consume().token_type
+        while self.check_type(TokenType.EQUAL_TO) or self.check_type(TokenType.NOT_EQUAL_TO):
+            op = to_operator[self.consume().value]
             r_expression = self.parse_comparison()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -257,8 +258,8 @@ class Parser:
         """
         l_expression = self.parse_term()
 
-        while self.check_type(Type.LESS_OR_EQUAL_TO) or self.check_type(Type.GREATER_OR_EQUAL_TO) or self.check_type(Type.CL_ANGLE_BRACKET) or self.check_type(Type.OP_ANGLE_BRACKET):
-            op = self.consume().token_type
+        while self.check_type(TokenType.LESS_OR_EQUAL_TO) or self.check_type(TokenType.GREATER_OR_EQUAL_TO) or self.check_type(TokenType.CL_ANGLE_BRACKET) or self.check_type(TokenType.OP_ANGLE_BRACKET):
+            op = to_operator[self.consume().value]
             r_expression = self.parse_term()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -270,8 +271,8 @@ class Parser:
         """
         l_expression = self.parse_factor()
 
-        while self.check_type(Type.PLUS) or self.check_type(Type.MINUS):
-            op = self.consume().token_type
+        while self.check_type(TokenType.PLUS) or self.check_type(TokenType.MINUS):
+            op = to_operator[self.consume().value]
             r_expression = self.parse_factor()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -283,8 +284,8 @@ class Parser:
         """
         l_expression = self.parse_unary()
 
-        while self.check_type(Type.DIVIDE) or self.check_type(Type.MULTIPLY):
-            op = self.consume().token_type
+        while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.MULTIPLY):
+            op = to_operator[self.consume().value]
             r_expression = self.parse_unary()
             l_expression = BinaryOperator(l_expression, op, r_expression)
         return l_expression
@@ -294,8 +295,8 @@ class Parser:
         """
         Unary          = ( "not" | "-" ) Unary | Primary ;
         """
-        if self.check_type(Type.NOT) or self.check_type(Type.MINUS):
-            op = self.consume().token_type
+        if self.check_type(TokenType.NOT) or self.check_type(TokenType.MINUS):
+            op = to_operator[self.consume().value]
             right = self.parse_unary()
             return UnaryOperator(op, right)
         return self.parse_primary()
@@ -320,11 +321,11 @@ class Parser:
         """
         Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
         """
-        if self.check_type(Type.BOOL): return Bool(self.consume().value)
-        if self.check_type(Type.STRING): return String(self.consume().value)
-        if self.check_type(Type.SCALAR): return Scalar(self.consume().value)
+        if self.check_type(TokenType.BOOL): return Bool(self.consume().value)
+        if self.check_type(TokenType.STRING): return String(self.consume().value)
+        if self.check_type(TokenType.SCALAR): return Scalar(self.consume().value)
         if (matrix_trial := self.try_parse_matrix()): return matrix_trial
-        if self.check_type(Type.IDENTIFIER):
+        if self.check_type(TokenType.IDENTIFIER):
             identifier = self.consume().value
             if (property_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return property_trial
             if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
@@ -337,11 +338,11 @@ class Parser:
         """
         Grouping = ‘(’ Expression ‘)’
         """
-        if not self.check_type(Type.OP_ROUND_BRACKET):
+        if not self.check_type(TokenType.OP_ROUND_BRACKET):
             return None
         self.consume()
         expression = self.parse_expression()
-        self.expect(Type.CL_ROUND_BRACKET)
+        self.expect(TokenType.CL_ROUND_BRACKET)
         return expression
 
 
@@ -349,14 +350,14 @@ class Parser:
         """
         Matrix = ‘[‘ {MatrixRow} ‘]’ ;
         """
-        if not self.check_type(Type.OP_SQUARE_BRACKET):
+        if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None
         first_token_of_matrix = self.consume()
 
         rows = []
-        while not self.check_type(Type.CL_SQUARE_BRACKET):
+        while not self.check_type(TokenType.CL_SQUARE_BRACKET):
             rows.append(self.parse_matrix_row())
-        self.expect(Type.CL_SQUARE_BRACKET)
+        self.expect(TokenType.CL_SQUARE_BRACKET)
 
         # jesli wszystkie wiersze nie maja równych długości
         if len([None for row in rows if len(row)==len(rows[0])]) != len(rows):
@@ -368,13 +369,13 @@ class Parser:
         """
         MatrixRow = ‘<’ Scalar {‘,’ Scalar } ‘>’ ;
         """
-        self.expect(Type.OP_ANGLE_BRACKET)
-        scalars = [Scalar(self.expect(Type.SCALAR).value)]
+        self.expect(TokenType.OP_ANGLE_BRACKET)
+        scalars = [Scalar(self.expect(TokenType.SCALAR).value)]
 
-        while not self.check_type(Type.CL_ANGLE_BRACKET):
-            self.expect(Type.COMMA)
-            scalars.append(Scalar(self.expect(Type.SCALAR).value))
-        self.expect(Type.CL_ANGLE_BRACKET)
+        while not self.check_type(TokenType.CL_ANGLE_BRACKET):
+            self.expect(TokenType.COMMA)
+            scalars.append(Scalar(self.expect(TokenType.SCALAR).value))
+        self.expect(TokenType.CL_ANGLE_BRACKET)
         return scalars
 
 
@@ -382,10 +383,10 @@ class Parser:
         """
         Property = Identifier ‘.’ Identifier ‘;’ ;
         """
-        if not self.check_type(Type.DOT):
+        if not self.check_type(TokenType.DOT):
             return None
         self.consume()
-        second_identifier = Identifier(self.expect(Type.IDENTIFIER).value)
+        second_identifier = Identifier(self.expect(TokenType.IDENTIFIER).value)
         return Property(first_identifier, second_identifier)
 
 
@@ -393,13 +394,13 @@ class Parser:
         """
         MatrixAccess = Identifier ‘[‘ Scalar ‘]’ ‘[‘ Scalar ‘]’
         """
-        if not self.check_type(Type.OP_SQUARE_BRACKET):
+        if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None
         self.consume()
         first_expression = self.parse_expression()
-        self.expect(Type.CL_SQUARE_BRACKET)
+        self.expect(TokenType.CL_SQUARE_BRACKET)
 
-        self.expect(Type.OP_SQUARE_BRACKET)
+        self.expect(TokenType.OP_SQUARE_BRACKET)
         second_expression = self.parse_expression()
-        self.expect(Type.CL_SQUARE_BRACKET)
+        self.expect(TokenType.CL_SQUARE_BRACKET)
         return Access(identifier, first_expression, second_expression)

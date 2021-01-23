@@ -5,7 +5,9 @@ Klasy obiektów najwyższych w hierarchii
 
 """
 
-class Program():
+from .Node import Node
+
+class Program(Node):
     def __init__(self, objects):
         self.toplevel_objects = objects
 
@@ -13,7 +15,7 @@ class Program():
         return f'{self.__class__.__name__}: {self.toplevel_objects}'
 
 
-class Function():
+class Function(Node):
     def __init__(self, name, parameter_list, block):
         self.name = name
         self.parameter_list = parameter_list
@@ -21,5 +23,8 @@ class Function():
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name} {self.parameter_list} {self.block}'
+
+    def accept(self, visitor):
+        return visitor.visit_function(self)
 
 

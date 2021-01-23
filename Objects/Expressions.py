@@ -12,7 +12,9 @@ Klasy obiektów reprezentujacych expression
 
 """
 
-class BinaryOperator():
+from .Node import Node
+
+class BinaryOperator(Node):
     def __init__(self, lvalue, op, rvalue):
         self.lvalue = lvalue
         self.op = op
@@ -21,8 +23,11 @@ class BinaryOperator():
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.op} < {self.lvalue} {self.rvalue} >'
 
+    def accept(self, visitor):
+        return visitor.visit_binary_operator(self)
 
-class UnaryOperator():
+
+class UnaryOperator(Node):
     def __init__(self, op, rvalue):
         self.op = op
         self.rvalue = rvalue
@@ -30,8 +35,22 @@ class UnaryOperator():
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.op} < {self.rvalue} >'
 
+    def accept(self, visitor):
+        return visitor.visit_unary_operator(self)
 
-class Scalar():
+
+class Scalar(Node):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.value}'
+
+    def accept(self, visitor):
+        return visitor.visit_scalar(self)
+
+
+class Bool(Node):
     def __init__(self, value):
         self.value = value
 
@@ -39,7 +58,7 @@ class Scalar():
         return f'{self.__class__.__name__}: {self.value}'
 
 
-class Bool():
+class String(Node):
     def __init__(self, value):
         self.value = value
 
@@ -47,15 +66,7 @@ class Bool():
         return f'{self.__class__.__name__}: {self.value}'
 
 
-class String():
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}: {self.value}'
-
-
-class Property():
+class Property(Node):
     def __init__(self, object_name, property_name):
         self.object_name = object_name
         self.property_name = property_name
@@ -64,7 +75,7 @@ class Property():
         return f'{self.__class__.__name__}: {self.object_name}.{self.property_name}'
 
 
-class Matrix():
+class Matrix(Node):
     def __init__(self, rows):
         self.rows = rows
 
@@ -72,7 +83,7 @@ class Matrix():
         return f'{self.__class__.__name__}: {self.rows}'
 
 
-class Access():
+class Access(Node):
     def __init__(self, identifier, first, second):
         self.identifier = identifier
         self.first = first
@@ -82,7 +93,7 @@ class Access():
         return f'{self.__class__.__name__}: {self.first} {self.second}'
 
 
-class Identifier():
+class Identifier(Node):
     def __init__(self, string):
         self.name = string
 

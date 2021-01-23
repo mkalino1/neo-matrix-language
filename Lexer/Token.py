@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class Type(Enum):
+class TokenType(Enum):
     EOF = auto()
     IDENTIFIER = auto()
     VAR_DECLARATION = auto()
@@ -46,43 +46,43 @@ class Type(Enum):
 
 class Symbol:
     special_characters = {
-        '(': Type.OP_ROUND_BRACKET,
-        ')': Type.CL_ROUND_BRACKET,
-        '[': Type.OP_SQUARE_BRACKET,
-        ']': Type.CL_SQUARE_BRACKET,
-        '{': Type.OP_CURLY_BRACKET,
-        '}': Type.CL_CURLY_BRACKET,
-        '<': Type.OP_ANGLE_BRACKET,
-        '>': Type.CL_ANGLE_BRACKET,
-        '*': Type.MULTIPLY,
-        '/': Type.DIVIDE,
-        '+': Type.PLUS,
-        '-': Type.MINUS,
-        ';': Type.SEMICOLON,
-        ',': Type.COMMA,
-        '.': Type.DOT,
-        '=': Type.ASSIGN
+        '(': TokenType.OP_ROUND_BRACKET,
+        ')': TokenType.CL_ROUND_BRACKET,
+        '[': TokenType.OP_SQUARE_BRACKET,
+        ']': TokenType.CL_SQUARE_BRACKET,
+        '{': TokenType.OP_CURLY_BRACKET,
+        '}': TokenType.CL_CURLY_BRACKET,
+        '<': TokenType.OP_ANGLE_BRACKET,
+        '>': TokenType.CL_ANGLE_BRACKET,
+        '*': TokenType.MULTIPLY,
+        '/': TokenType.DIVIDE,
+        '+': TokenType.PLUS,
+        '-': TokenType.MINUS,
+        ';': TokenType.SEMICOLON,
+        ',': TokenType.COMMA,
+        '.': TokenType.DOT,
+        '=': TokenType.ASSIGN
     }
 
     double_operators = {
-        '<=': Type.LESS_OR_EQUAL_TO,
-        '>=': Type.GREATER_OR_EQUAL_TO,
-        '==': Type.EQUAL_TO,
-        '!=': Type.NOT_EQUAL_TO
+        '<=': TokenType.LESS_OR_EQUAL_TO,
+        '>=': TokenType.GREATER_OR_EQUAL_TO,
+        '==': TokenType.EQUAL_TO,
+        '!=': TokenType.NOT_EQUAL_TO
     }
 
     reserved_words = {
-        'and': Type.AND,
-        'or': Type.OR,
-        'not': Type.NOT,
-        'var': Type.VAR_DECLARATION,
-        'true': Type.BOOL,
-        'false': Type.BOOL,
-        'return': Type.RETURN,
-        'function': Type.FUNCTION,
-        'if': Type.IF,
-        'else': Type.ELSE,
-        'while': Type.WHILE
+        'and': TokenType.AND,
+        'or': TokenType.OR,
+        'not': TokenType.NOT,
+        'var': TokenType.VAR_DECLARATION,
+        'true': TokenType.BOOL,
+        'false': TokenType.BOOL,
+        'return': TokenType.RETURN,
+        'function': TokenType.FUNCTION,
+        'if': TokenType.IF,
+        'else': TokenType.ELSE,
+        'while': TokenType.WHILE
     }
 
 

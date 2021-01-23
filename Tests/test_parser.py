@@ -1,4 +1,4 @@
-from Lexer.Token import Type
+from Lexer.Token import TokenType
 from Objects.ToplevelObjects import Function
 from Objects.Instructions import Block, FunctionCall, IfStatement, Return
 from Objects.Expressions import *
@@ -29,18 +29,18 @@ def test_order_of_operations():
     assert isinstance(next(objects).expression.lvalue, Scalar)
 
     expression = next(objects).expression
-    assert expression.op == Type.EQUAL_TO
-    assert expression.lvalue.op == Type.LESS_OR_EQUAL_TO
-    assert expression.rvalue.op == Type.GREATER_OR_EQUAL_TO
+    assert expression.op == TokenType.EQUAL_TO
+    assert expression.lvalue.op == TokenType.LESS_OR_EQUAL_TO
+    assert expression.rvalue.op == TokenType.GREATER_OR_EQUAL_TO
 
     expression = next(objects).expression
-    assert expression.op == Type.AND
+    assert expression.op == TokenType.AND
 
     expression = next(objects).expression
-    assert expression.op == Type.MINUS
+    assert expression.op == TokenType.MINUS
 
     expression = next(objects).expression
-    assert expression.op == Type.NOT
+    assert expression.op == TokenType.NOT
 
 
 def test_function():

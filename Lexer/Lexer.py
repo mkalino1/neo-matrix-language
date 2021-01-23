@@ -1,5 +1,5 @@
 from .Source import Source
-from .Token import Token, Symbol, Type
+from .Token import Token, Symbol, TokenType
 from Errors.LexerExceptions import ErrorCode, LexerError
 
 
@@ -12,7 +12,7 @@ class Lexer:
 
 
     def yield_tokens(self):
-        while(self.token == None or self.token.token_type != Type.EOF):
+        while(self.token == None or self.token.token_type != TokenType.EOF):
             self.build_next_token()
             yield self.token
 
@@ -43,7 +43,7 @@ class Lexer:
 
     def try_build_eof(self):
         if self.source.current_char == '':
-            self.token = Token(Type.EOF, '')
+            self.token = Token(TokenType.EOF, '')
             return True
         return False
 
@@ -63,7 +63,7 @@ class Lexer:
                 self.token = Token(token_type, word)
                 return True
             else:
-                self.token = Token(Type.IDENTIFIER, word)
+                self.token = Token(TokenType.IDENTIFIER, word)
                 return True
         return False
 
@@ -93,10 +93,10 @@ class Lexer:
                 buffer += self.source.current_char
                 self.source.move_to_next_char()
 
-            self.token = Token(Type.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
+            self.token = Token(TokenType.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
             return                     
         else:
-            self.token = Token(Type.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
+            self.token = Token(TokenType.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
         return                         
 
 
@@ -150,7 +150,7 @@ class Lexer:
 
         self.source.move_to_next_char()
 
-        self.token = Token(Type.STRING, ''.join(chars))
+        self.token = Token(TokenType.STRING, ''.join(chars))
         return True
 
 

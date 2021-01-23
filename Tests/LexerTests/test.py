@@ -1,5 +1,5 @@
 from Lexer.Lexer import Lexer
-from Lexer.Token import Type
+from Lexer.Token import TokenType
 
 
 # TESTOWANIE PRAWIDLOWYCH WARTOSCI TOKENOW
@@ -17,9 +17,9 @@ for token in lexer_values.yield_tokens():
 # TESTOWANIE PRAWIDLOWYCH TYPOW TOKENOW
 lexer_token_types = Lexer(filename="test_types.txt")
 
-correct_doubles = [Type.GREATER_OR_EQUAL_TO, Type.LESS_OR_EQUAL_TO, Type.NOT_EQUAL_TO, Type.EQUAL_TO]
-correct_booleans = [Type.BOOL, Type.BOOL]
-correct_scalars = iter(correct_doubles+ correct_booleans + [Type.EOF])
+correct_doubles = [TokenType.GREATER_OR_EQUAL_TO, TokenType.LESS_OR_EQUAL_TO, TokenType.NOT_EQUAL_TO, TokenType.EQUAL_TO]
+correct_booleans = [TokenType.BOOL, TokenType.BOOL]
+correct_scalars = iter(correct_doubles+ correct_booleans + [TokenType.EOF])
 
 for token in lexer_token_types.yield_tokens():
     print(token.token_type)
