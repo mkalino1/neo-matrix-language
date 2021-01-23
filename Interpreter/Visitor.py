@@ -1,6 +1,6 @@
-from Objects.Instructions import Assignment, Block, FunctionCall, Return
+from Objects.Instructions import Assignment, Block, FunctionCall, IfStatement, Return, WhileLoop
 from Objects.ToplevelObjects import Function
-from Objects.Expressions import BinaryOperator, Identifier, Scalar, UnaryOperator
+from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, Scalar, UnaryOperator
 from Objects.OperatorType import OperatorType
     
 class Interpreter():
@@ -22,16 +22,12 @@ class Interpreter():
 
 class Visitor:
     def __init__(self):
-        self.global_variables = {}
+        self.variables = [{}]
         self.functions = {}
 
     # Scalar or bool or string
     def visit_literal(self, literal):
         return literal.value
-
-
-    def evaluate(self, expression):
-        return expression.accept(self)
 
 
     def visit_function(self, function:Function):
@@ -45,19 +41,46 @@ class Visitor:
             raise RuntimeError("Incorrect number of arguments")
 
         for param, arg in zip(function.parameter_list, function_call.arguments):
-            function.block.local_variables[param.value] = arg.value
+            function.block.passed_variables[param.value] = arg.accept(self)
 
         return function.block.accept(self)
 
 
     def visit_block(self, block:Block):
-        print(f'Weszlismy w blok, instrukcje: {block.instructions}, zmienne lokalne: {block.local_variables}')
+        print(f'Weszlismy w blok, instrukcje: {block.instructions}, zmienne passed: {block.passed_variables}')
 
+        self.variables.append({})
+
+        # jeśli blok ten jest ciałem funkcji to trzeba dołączyć przekazane jako argumenty zmienne
+        self.variables[-1].update(block.passed_variables)
+
+        return_value = None
         for instruction in block.instructions:
             if isinstance(instruction, Return):
                 print("Pierwsze wystapienie return instruction osiagniete")
-                return instruction.accept(self)
+                return_value = instruction.accept(self)
+                break 
             instruction.accept(self)
+
+        self.variables.pop()
+        return return_value
+
+
+    def visit_if_statement(self, if_statement:IfStatement):
+        condition = if_statement.condition.accept(self)
+
+        if condition:
+            if_statement.block.accept(self)
+        elif if_statement.else_block:
+            if_statement.else_block.accept(self)
+
+
+    def visit_while_loop(self, while_loop:WhileLoop):
+        condition = while_loop.condition.accept(self)
+
+        while condition:
+            while_loop.block.accept(self)
+            condition = while_loop.condition.accept(self)
 
 
     def visit_return(self, return_instruction:Return):
@@ -65,21 +88,51 @@ class Visitor:
 
 
     def visit_assignment(self, assignment:Assignment):
-        # co jesli juz jest
-        self.global_variables[assignment.identifier.value] = assignment.expression.accept(self)
-        return assignment.expression.accept(self)
+        expression_value = assignment.expression.accept(self)
+
+        for scope in self.variables[::-1]:
+            if assignment.identifier.value in scope:
+                scope[assignment.identifier.value] = expression_value
+        self.variables[-1][assignment.identifier.value] = expression_value
+
 
     def visit_identifier(self, identifier:Identifier):
-        print(f'hello from visit id: {self.global_variables[identifier.value]}')
-        return self.global_variables[identifier.value]
+        for scope in self.variables[::-1]:
+            if identifier.value in scope:
+                print(f'Variable found: {scope[identifier.value]}')
+                return scope[identifier.value]
+        
+        raise RuntimeError("Variable doesn't exist") 
+
+
+    def visit_matrix(self, matrix:Matrix):
+        return matrix
+
+
+    def visit_access(self, access:Access):
+        matrix = access.identifier.accept(self)
+
+        if not isinstance(matrix, Matrix):
+            raise RuntimeError("Matrix is needed for access operation")
+
+        return matrix.rows[access.first.value][access.second.value]
+                
+
+    def visit_property(self, property:Property):
+        object = property.object_name.accept(self)
+
+        if not isinstance(object, Matrix):
+            raise RuntimeError("Only supported object is Matrix")
+
+        return object.properties[property.property_name.value]
 
 
     def visit_unary_operator(self, unary:UnaryOperator):
-        right = self.evaluate(unary.rvalue)
+        right = unary.rvalue.accept(self)
 
         # TODO: rozbudowac obsluge roznych typow. Matrix przede wszystkim
         if unary.op == OperatorType.MINUS:
-            return right
+            return -right
 
         if unary.op == OperatorType.NOT:
             return not bool(right)
@@ -88,8 +141,8 @@ class Visitor:
 
 
     def visit_binary_operator(self, binary:BinaryOperator):
-        left = self.evaluate(binary.lvalue)
-        right = self.evaluate(binary.rvalue)
+        left = binary.lvalue.accept(self)
+        right = binary.rvalue.accept(self)
 
         # TODO: konkatenacja stringow
         if binary.op == OperatorType.PLUS:

@@ -10,7 +10,7 @@ from .Node import Node
 class Block(Node):
     def __init__(self, instructions):
         self.instructions = instructions
-        self.local_variables = {}
+        self.passed_variables = {}
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.instructions}'
@@ -27,6 +27,9 @@ class IfStatement(Node):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.condition} {self.block} {self.else_block}'
+
+    def accept(self, visitor):
+        return visitor.visit_if_statement(self)
 
 
 class Return(Node):
@@ -47,6 +50,9 @@ class WhileLoop(Node):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.condition} {self.block}'
+
+    def accept(self, visitor):
+        return visitor.visit_while_loop(self)
 
 
 class FunctionCall(Node):

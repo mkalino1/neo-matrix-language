@@ -80,13 +80,45 @@ class Property(Node):
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.object_name}.{self.property_name}'
 
+    def accept(self, visitor):
+        return visitor.visit_property(self)
+
 
 class Matrix(Node):
     def __init__(self, rows):
         self.rows = rows
+        self.properties = {}
+        self.properties['det'] = self.determinant(rows)
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.rows}'
+
+    def accept(self, visitor):
+        return visitor.visit_matrix(self)
+
+    def determinant(self, A):
+        # Section 1: Establish n parameter and copy A
+        n = len(A)
+        AM = [x[:] for x in A]
+    
+        # Section 2: Row ops on A to get in upper triangle form
+        for fd in range(n): # A) fd stands for focus diagonal
+            for i in range(fd+1,n): # B) only use rows below fd row
+                if AM[fd][fd] == 0: # C) if diagonal is zero ...
+                    AM[fd][fd] == 1.0e-18 # change to ~zero
+                # D) cr stands for "current row"
+                crScaler = AM[i][fd] / AM[fd][fd] 
+                # E) cr - crScaler * fdRow, one element at a time
+                for j in range(n): 
+                    AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
+        
+        # Section 3: Once AM is in upper triangle form ...
+        product = 1.0
+        for i in range(n):
+            # ... product of diagonals is determinant
+            product *= AM[i][i] 
+    
+        return product
 
 
 class Access(Node):
@@ -97,6 +129,9 @@ class Access(Node):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.first} {self.second}'
+
+    def accept(self, visitor):
+        return visitor.visit_access(self)
 
 
 class Identifier(Node):

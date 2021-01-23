@@ -1,6 +1,7 @@
 function hej(raz, dwa, trzy){
-    a = 23;
-    return a;
+    a = [<1, 2><3, 4>];
+
+    return a.det;
 }
 
-hej("krowa", "rzywa", 6);
+hej(-10, 1, 6);

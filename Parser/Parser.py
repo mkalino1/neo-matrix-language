@@ -326,11 +326,11 @@ class Parser:
         if self.check_type(TokenType.SCALAR): return Scalar(self.consume().value)
         if (matrix_trial := self.try_parse_matrix()): return matrix_trial
         if self.check_type(TokenType.IDENTIFIER):
-            identifier = self.consume().value
+            identifier = Identifier(self.consume().value)
             if (property_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return property_trial
             if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
             if (access_trial := self.try_parse_access_with_consumed_identifier(identifier)): return access_trial
-            return Identifier(identifier)
+            return identifier
         return None
 
 
@@ -370,11 +370,11 @@ class Parser:
         MatrixRow = ‘<’ Scalar {‘,’ Scalar } ‘>’ ;
         """
         self.expect(TokenType.OP_ANGLE_BRACKET)
-        scalars = [Scalar(self.expect(TokenType.SCALAR).value)]
+        scalars = [self.expect(TokenType.SCALAR).value]
 
         while not self.check_type(TokenType.CL_ANGLE_BRACKET):
             self.expect(TokenType.COMMA)
-            scalars.append(Scalar(self.expect(TokenType.SCALAR).value))
+            scalars.append(self.expect(TokenType.SCALAR).value)
         self.expect(TokenType.CL_ANGLE_BRACKET)
         return scalars
 
