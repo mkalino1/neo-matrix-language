@@ -1,11 +1,11 @@
-from .Source import Source
+from .Source import SourceFile
 from .Token import Token, Symbol, TokenType
 from Errors.LexerExceptions import ErrorCode, LexerError
 
 
 class Lexer:
-    def __init__(self, filename, MAX_IDENTIFIER_LENGHT = 100, MAX_STRING_LENGHT = 500):
-        self.source = Source(filename)
+    def __init__(self, source, MAX_IDENTIFIER_LENGHT = 100, MAX_STRING_LENGHT = 500):
+        self.source = source
         self.token = None
         self.MAX_IDENTIFIER_LENGHT = MAX_IDENTIFIER_LENGHT
         self.MAX_STRING_LENGHT = MAX_STRING_LENGHT

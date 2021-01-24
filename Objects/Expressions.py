@@ -57,7 +57,7 @@ class Scalar(Node):
 class Bool(Node):
     def __init__(self, value, line=None, column=None):
         super().__init__(line, column)
-        self.value = value == "true"
+        self.value = value == "True"
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.value}'
@@ -129,7 +129,8 @@ class Matrix(Node):
 
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.rows}'
+        string = '\n'.join([repr(row) for row in self.rows])
+        return f'{self.__class__.__name__}:\n{string}'
 
 
     def accept(self, visitor):

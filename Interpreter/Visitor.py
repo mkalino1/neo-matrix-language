@@ -3,7 +3,9 @@ from Objects.ToplevelObjects import Function
 from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, UnaryOperator
 from Objects.OperatorType import OperatorType
 from Errors.InterpreterExceptions import NeoRuntimeError
-    
+from .Built_ins import builtin_functions
+
+
 class Interpreter():
     def __init__(self, parsed_program):
         self.parsed_objects = parsed_program.toplevel_objects
@@ -12,11 +14,10 @@ class Interpreter():
     def run(self):
         for top_level_object in self.parsed_objects:
             try:
-                print(f'TOP LEVEL: {top_level_object.accept(self.visitor)}')
+                top_level_object.accept(self.visitor)
             except NeoRuntimeError as e:
                 print(e)
                 return
-        return "Job is done"
   
 
 class Visitor:
@@ -26,17 +27,27 @@ class Visitor:
 
 
     def visit_function(self, function:Function):
+        if function.name.value in builtin_functions:
+            raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved", function.name.line, function.name.column)
+
         self.functions[function.name.value] = function
 
 
     def visit_function_call(self, function_call:FunctionCall):
+        line = function_call.function_name.line
+        column = function_call.function_name.column
+
+        if function_call.function_name.value in builtin_functions:
+            builtin_function = builtin_functions[function_call.function_name.value]
+            return builtin_function(line, column, *[arg.accept(self) for arg in function_call.arguments])
+
         if not function_call.function_name.value in self.functions:
-            raise NeoRuntimeError(f"Function '{ function_call.function_name.value}' doesn't exist", function_call.function_name.line, function_call.function_name.column) 
+            raise NeoRuntimeError(f"Function '{ function_call.function_name.value}' doesn't exist", line, column) 
 
         function:Function = self.functions[function_call.function_name.value]
 
         if len(function.parameter_list) != len(function_call.arguments):
-            raise NeoRuntimeError("Incorrect number of arguments", function_call.function_name.line, function_call.function_name.column)
+            raise NeoRuntimeError("Incorrect number of arguments", line, column)
 
         for param, arg in zip(function.parameter_list, function_call.arguments):
             function.block.passed_variables[param.value] = arg.accept(self)
@@ -45,8 +56,6 @@ class Visitor:
 
 
     def visit_block(self, block:Block):
-        # print(f'Weszlismy w blok, instrukcje: {block.instructions}, zmienne passed: {block.passed_variables}')
-
         self.variables.append({})
 
         # jeśli blok ten jest ciałem funkcji to trzeba dołączyć przekazane jako argumenty zmienne

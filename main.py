@@ -1,8 +1,18 @@
 from Interpreter.Visitor import Interpreter
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
+from Lexer.Source import SourceFile, SourceString
 
-lexer = Lexer(filename="program.neo")
+string = """
+function hej(){
+    return "test";
+}
+print(hej(), 5);
+"""
+
+source = SourceFile("program.neo")
+source = SourceString(string)
+lexer = Lexer(source)
 parser = Parser(lexer)
 
 parsed_program = parser.parse_program()
