@@ -28,7 +28,7 @@ class Visitor:
 
     def visit_function(self, function:Function):
         if function.name.value in builtin_functions:
-            raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved", function.name.line, function.name.column)
+            raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
         self.functions[function.name.value] = function
 
@@ -104,22 +104,24 @@ class Visitor:
             self.variables[-1][assignment.identifier.value] = expression_value
 
         else:
-            if not (assignment.first_index.value.is_integer() and assignment.second_index.value.is_integer()):
-                raise NeoRuntimeError("Indieces of matrix must be whole numbers", assignment.line, assignment.column)
+            first_index_value = assignment.first_index.accept(self)
+            second_index_value = assignment.second_index.accept(self)
+
+            if not (first_index_value.is_integer() and second_index_value.is_integer()):
+                raise NeoRuntimeError("Indieces must be whole numbers", assignment.line, assignment.column)
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
                     matrix:Matrix = scope[assignment.identifier.value]
                     if not isinstance(matrix, Matrix):
-                        raise NeoRuntimeError("You can't use access in non-matrix", assignment.line, assignment.column)
-                    matrix.rows[int(assignment.first_index.value)][int(assignment.second_index.value)] = expression_value
+                        raise NeoRuntimeError("Only matrix can use access operation", assignment.line, assignment.column)
+                    matrix.rows[int(first_index_value)][int(second_index_value)] = expression_value
                     return
-            raise NeoRuntimeError("You can't use access in non-existing matrix", assignment.line, assignment.column)     
+            raise NeoRuntimeError(f"Matrix {assignment.identifier.value} doesn't exist", assignment.line, assignment.column)     
 
 
     def visit_identifier(self, identifier:Identifier):
         for scope in self.variables[::-1]:
             if identifier.value in scope:
-                # print(f'Variable found: {scope[identifier.value]}')
                 return scope[identifier.value]
         
         raise NeoRuntimeError(f"Variable '{identifier.value}' doesn't exist", identifier.line, identifier.column) 
@@ -156,7 +158,7 @@ class Visitor:
         object = property.object_name.accept(self)
 
         if not isinstance(object, Matrix):
-            raise NeoRuntimeError("Only supported object for now is Matrix", property.line, property.column)
+            raise NeoRuntimeError("Only matrix can have properties", property.line, property.column)
 
         try: 
             property_getter = object.properties[property.property_name.value]
@@ -190,8 +192,8 @@ class Visitor:
                 raise NeoRuntimeError(f"Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
             return left - right
         if binary.op == OperatorType.MULTIPLY:
-            if isinstance(left, str) and isinstance(right, str):
-                raise NeoRuntimeError(f"Cannot multiply two strings", binary.lvalue.line, binary.lvalue.column)
+            if isinstance(left, str) or isinstance(right, str):
+                raise NeoRuntimeError(f"Strings cannot take part in multiply operation", binary.lvalue.line, binary.lvalue.column)
             return left * right
         if binary.op == OperatorType.DIVIDE:
             if isinstance(left, Matrix) or isinstance(right, Matrix):
@@ -203,7 +205,7 @@ class Visitor:
             except ZeroDivisionError:
                 raise NeoRuntimeError(f"Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
 
-        # Obsługa różnych typów obsłużona poprzez __eq__
+        # Przypadki różnych typów obsłużone poprzez __eq__
         if binary.op == OperatorType.EQUAL:
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:

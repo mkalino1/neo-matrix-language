@@ -126,11 +126,11 @@ class Matrix(Node):
         self.properties['rowlen'] = self.rowlen
         self.properties['collen'] = self.collen
         self.properties['transposed'] = self.transposed
+        self.properties['copy'] = self.copy
 
 
     def __repr__(self):
-        string = '\n'.join([repr(row) for row in self.rows])
-        return f'{self.__class__.__name__}:\n{string}'
+        return '\n'.join([repr(row) for row in self.rows])
 
 
     def accept(self, visitor):
@@ -254,7 +254,27 @@ class Matrix(Node):
 
 
     def __rsub__(self, other):
-        return self.__sub__(other)
+        result = []
+        if isinstance(other, Matrix):
+            if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
+                raise NeoRuntimeError("Matrixes must have the same shape", self.line, self.column)
+
+            for row1, row2 in zip(self.rows, other.rows):
+                new_row = []
+                for elem1, elem2 in zip(row1, row2):
+                    new_row.append(elem2 - elem1)
+                result.append(new_row)
+
+        elif isinstance(other, float):
+            for row in self.rows:
+                new_row = []
+                for elem in row:
+                    new_row.append(other - elem)
+                result.append(new_row)
+        else:
+            raise NeoRuntimeError(f"You cannot substract 'Matrix' with '{other.__class__.__name__}'", self.line, self.column)
+
+        return Matrix(result, self.line, self.column)
 
 
     def rowlen(self):
@@ -264,6 +284,9 @@ class Matrix(Node):
     def collen(self):
         return len(self.rows[0])
 
+    def copy(self):
+        return Matrix([row[:] for row in self.rows], self.line, self.column)
+
 
     def transposed(self):
         result = [[self.rows[j][i] for j in range(len(self.rows))] for i in range(len(self.rows[0]))]
@@ -271,25 +294,19 @@ class Matrix(Node):
 
 
     def determinant(self):
-        # Section 1: Establish n parameter and copy A
-        A = self.rows
-        n = len(A)
-        AM = [x[:] for x in A]
-        # Section 2: Row ops on A to get in upper triangle form
-        for fd in range(n): # A) fd stands for focus diagonal
-            for i in range(fd+1,n): # B) only use rows below fd row
-                if AM[fd][fd] == 0: # C) if diagonal is zero ...
-                    AM[fd][fd] == 1.0e-18 # change to ~zero
-                # D) cr stands for "current row"
-                crScaler = AM[i][fd] / AM[fd][fd] 
-                # E) cr - crScaler * fdRow, one element at a time
-                for j in range(n): 
-                    AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
-        # Section 3: Once AM is in upper triangle form ...
-        product = 1.0
-        for i in range(n):
-            # ... product of diagonals is determinant
-            product *= AM[i][i] 
-        return product
+        def getMatrixMinor(m,i,j):
+            return [row[:j] + row[j+1:] for row in (m[:i]+m[i+1:])]
+
+        def getMatrixDeternminant(m):
+            #base case for 2x2 matrix
+            if len(m) == 2:
+                return m[0][0]*m[1][1]-m[0][1]*m[1][0]
+
+            determinant = 0
+            for c in range(len(m)):
+                determinant += ((-1)**c)*m[0][c]*getMatrixDeternminant(getMatrixMinor(m,0,c))
+            return determinant
+
+        return(getMatrixDeternminant(self.rows))
 
 
