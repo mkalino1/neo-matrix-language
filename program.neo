@@ -1,7 +1,10 @@
+function return_5(){
+    return 5;
+}
 
 function second(n){
-    a = [[1, "string"]];
-    return a;
+    a = [[1.2]];
+    return [[1, 2][3, 4]] *  [[1][2]];
 }
 
 second(3);

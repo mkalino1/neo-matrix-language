@@ -35,7 +35,7 @@ class Visitor:
 
     def visit_function_call(self, function_call:FunctionCall):
         if not function_call.function_name.value in self.functions:
-            raise NeoRuntimeError(f"Function { function_call.function_name.value} doesn't exist", function_call.function_name.line, function_call.function_name.column) 
+            raise NeoRuntimeError(f"Function '{ function_call.function_name.value}' doesn't exist", function_call.function_name.line, function_call.function_name.column) 
 
         function:Function = self.functions[function_call.function_name.value]
 
@@ -117,7 +117,7 @@ class Visitor:
                 # print(f'Variable found: {scope[identifier.value]}')
                 return scope[identifier.value]
         
-        raise NeoRuntimeError(f"Variable {identifier.value} doesn't exist", identifier.line, identifier.column) 
+        raise NeoRuntimeError(f"Variable '{identifier.value}' doesn't exist", identifier.line, identifier.column) 
 
 
     def visit_matrix(self, matrix:Matrix):
@@ -153,7 +153,11 @@ class Visitor:
         if not isinstance(object, Matrix):
             raise NeoRuntimeError("Only supported object for now is Matrix", property.line, property.column)
 
-        property_getter = object.properties[property.property_name.value]
+        try: 
+            property_getter = object.properties[property.property_name.value]
+        except KeyError:
+            raise NeoRuntimeError(f"Unknown property '{property.property_name.value}'", property.line, property.column)
+
         return property_getter()
 
 
@@ -184,19 +188,34 @@ class Visitor:
         if binary.op == OperatorType.DIVIDE:
             return left / right
 
-        if binary.op == OperatorType.GREATER:
-            return left > right
-        if binary.op == OperatorType.GREATER_OR_EQUAL:
-            return left >= right
-        if binary.op == OperatorType.LESS:
-            return left < right
-        if binary.op == OperatorType.LESS_OR_EQUAL:
-            return left <= right
-
-        # Obsługa różnych typów poprzez __eq__
+        # Obsługa różnych typów obsłużona poprzez __eq__
         if binary.op == OperatorType.EQUAL:
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:
             return left != right
+
+        # Porównania
+        if binary.op == OperatorType.GREATER:
+            try: 
+                return left > right
+            except TypeError:
+                raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '>' operator", binary.lvalue.line, binary.lvalue.column)
+        if binary.op == OperatorType.GREATER_OR_EQUAL:
+            try: 
+                return left >= right
+            except TypeError:
+                raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '>=' operator", binary.lvalue.line, binary.lvalue.column)
+        if binary.op == OperatorType.LESS:
+            try: 
+                return left < right
+            except TypeError:
+                raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '<' operator", binary.lvalue.line, binary.lvalue.column)
+        if binary.op == OperatorType.LESS_OR_EQUAL:
+            try: 
+                return left <= right
+            except TypeError:
+                raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '<=' operator", binary.lvalue.line, binary.lvalue.column)
+
+ 
 
         raise NeoRuntimeError("Unknown binary operator", binary.line, binary.column)

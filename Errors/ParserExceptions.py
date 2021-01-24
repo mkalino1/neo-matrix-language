@@ -15,6 +15,13 @@ class InvalidMatrix(Exception):
         super().__init__(self.message)
 
 
+class EmptyMatrix(Exception):
+    def __init__(self, position=(0, 0)):
+        self.position = position
+        self.message = f'Error at line: {position[0]}, column: {position[1]}. Matrix cannot be empty'
+        super().__init__(self.message)
+
+
 class InvalidFilename(Exception):
     def __init__(self, filename):
         self.filename = filename

@@ -384,6 +384,8 @@ class Parser:
         # jesli wszystkie wiersze nie maja równych długości
         if len([None for row in rows if len(row)==len(rows[0])]) != len(rows):
             raise InvalidMatrix((first_token_of_matrix.line, first_token_of_matrix.column))
+        if len(rows) == 0:
+            raise EmptyMatrix((first_token_of_matrix.line, first_token_of_matrix.column))
         return Matrix(rows, first_token_of_matrix.line, first_token_of_matrix.column)
 
 
