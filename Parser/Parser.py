@@ -60,7 +60,7 @@ class Parser:
         parameter_list = self.parse_parameters()
         self.expect(TokenType.CL_ROUND_BRACKET)
 
-        function_block = self.parse_block()
+        function_block = self.parse_block(is_function_body=True)
         return Function(function_identifier, parameter_list, function_block, first_token.line, first_token.column)
 
 
@@ -94,13 +94,13 @@ class Parser:
         return arguments_list
 
 
-    def try_parse_block(self):
+    def try_parse_block(self, is_function_body = False):
         if not self.check_type(TokenType.OP_CURLY_BRACKET):
             return None
-        return self.parse_block()
+        return self.parse_block(is_function_body)
 
 
-    def parse_block(self):
+    def parse_block(self, is_function_body = False):
         """
         BlockInstruction = ‘{‘ {Instruction} ‘}’
         """
@@ -109,7 +109,7 @@ class Parser:
         while not self.check_type(TokenType.CL_CURLY_BRACKET):
             instructions.append(self.parse_instruction())
         self.expect(TokenType.CL_CURLY_BRACKET)
-        return Block(instructions, first_token.line, first_token.column)
+        return Block(instructions, is_function_body, first_token.line, first_token.column)
 
 
     def try_parse_instruction(self):

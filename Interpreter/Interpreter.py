@@ -56,7 +56,9 @@ class Visitor:
 
 
     def visit_block(self, block:Block):
-        self.variables.append({})
+        # tworzenie nowego scope
+        if block.is_function_body:
+            self.variables.append({})
 
         # jeśli blok ten jest ciałem funkcji to trzeba dołączyć przekazane jako argumenty zmienne
         self.variables[-1].update(block.passed_variables)
@@ -66,7 +68,8 @@ class Visitor:
             if return_value := instruction.accept(self):
                 break
 
-        self.variables.pop()
+        if block.is_function_body:
+            self.variables.pop()
         return return_value
 
 
@@ -96,11 +99,8 @@ class Visitor:
     def visit_assignment(self, assignment:Assignment):
         expression_value = assignment.expression.accept(self)
 
+        # Zapisywać zmienne można wyłącznie w bieżącym scope
         if not assignment.first_index:
-            for scope in self.variables[::-1]:
-                if assignment.identifier.value in scope:
-                    scope[assignment.identifier.value] = expression_value
-                    return
             self.variables[-1][assignment.identifier.value] = expression_value
 
         else:

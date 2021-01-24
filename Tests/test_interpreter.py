@@ -26,6 +26,29 @@ correct_outputs.append("""55.0
 """)
 
 
+################# SCOPE TEST ##################
+programs.append("""
+a = 2;
+arg = 0;
+
+function scope(arg){
+    print(a);
+    a = 4;
+    print(a);
+    
+    print(arg);
+}
+
+scope(8);
+print(arg);
+""")
+correct_outputs.append("""2.0
+4.0
+8.0
+0.0
+""")
+
+
 ################# WHILE TEST ##################
 programs.append("""
 m = zeros(3, 4);
@@ -46,7 +69,7 @@ correct_outputs.append("""[0.0, 0.0, 0.0, 0.0]
 """)
 
 
-################# IF WHILE TEST ##################
+################# IF ELSE WHILE TEST ##################
 programs.append("""
 function fun(arg){
     m = [[3, 2][3, 4]];
@@ -74,6 +97,9 @@ Not arg
 ################# TRUTHY TEST ##################
 programs.append("""
 if([[0]]){
+    print(0);
+}
+if([[0, 0][0, 0][0, 0]]){
     print(1);
 }
 if([[0.1]]){
@@ -105,7 +131,7 @@ correct_outputs.append("""2.0
 """)
 
 
-################# MATRIX_SCALAR TEST ##################
+################# MATRIX-SCALAR OPERATIONS TEST ##################
 programs.append("""
 m = [[1, 2][3, 4]];
 n = [[11, 22][33, 44]];

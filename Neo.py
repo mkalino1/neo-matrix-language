@@ -10,7 +10,7 @@ parser.add_argument("filename", help="Pass path to Neo program to interpret", ty
 args = parser.parse_args()
 
 # source_string = """
-# m = zeros(2, 3);
+# m = [[1, 2, 3][4, 5, 6][7, 8, 8]];
 # m = m.transposed;
 
 # print(m);
