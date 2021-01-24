@@ -140,7 +140,7 @@ class Parser:
 
         raise InvalidSyntax(
             (self.lexer.token.line, self.lexer.token.column),
-            "equal sign or left round bracket",
+            "equal sign or left round or square bracket",
             self.lexer.token.token_type,
             self.lexer.token.value
         )
@@ -211,16 +211,20 @@ class Parser:
         return FunctionCall(first_identifier, arguments, first_identifier.line, first_identifier.column)
 
 
-    def try_parse_assignment_with_consumed_identifier(self, first_identifier):
+    def try_parse_assignment_with_consumed_identifier(self, identifier):
         """
-        Assignment = Identifier ‘=’ Expression ‘;’ ;
+        Assignment = (Access | Identifier) ‘=’ Expression ‘;’ ;
         """
-        if not self.check_type(TokenType.ASSIGN):
+        if not (self.check_type(TokenType.ASSIGN) or self.check_type(TokenType.OP_SQUARE_BRACKET)):
             return None
-        self.consume()
+
+        first_index, second_index = None, None
+        if access := self.try_parse_access_with_consumed_identifier(identifier):
+            first_index, second_index = access.first, access.second
+        self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
         self.expect(TokenType.SEMICOLON)
-        return Assignment(first_identifier, expression, first_identifier.line, first_identifier.column)
+        return Assignment(identifier, first_index, second_index, expression, identifier.line, identifier.column)
 
 
     def parse_expression(self):

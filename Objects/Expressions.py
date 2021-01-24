@@ -96,6 +96,8 @@ class Matrix(Node):
         self.rows = rows
         self.properties = {}
         self.properties['det'] = self.determinant
+        self.properties['rowlen'] = self.rowlen
+        self.properties['collen'] = self.collen
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.rows}'
@@ -103,12 +105,29 @@ class Matrix(Node):
     def accept(self, visitor):
         return visitor.visit_matrix(self)
 
+    def __eq__(self, other):
+        if not isinstance(other, Matrix):
+            return False
+        if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
+            return False       
+        for row1, row2 in zip(self.rows, other.rows):
+            for elem1, elem2 in zip(row1, row2):
+                print(f'Elem 1: {elem1}, Elem 2: {elem2}')
+                if elem1 != elem2:
+                    return False
+        return True 
+
+    def rowlen(self):
+        return len(self.rows)
+
+    def collen(self):
+        return len(self.rows[0])
+
     def determinant(self):
         # Section 1: Establish n parameter and copy A
         A = self.rows
         n = len(A)
         AM = [x[:] for x in A]
-    
         # Section 2: Row ops on A to get in upper triangle form
         for fd in range(n): # A) fd stands for focus diagonal
             for i in range(fd+1,n): # B) only use rows below fd row
@@ -119,13 +138,11 @@ class Matrix(Node):
                 # E) cr - crScaler * fdRow, one element at a time
                 for j in range(n): 
                     AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
-        
         # Section 3: Once AM is in upper triangle form ...
         product = 1.0
         for i in range(n):
             # ... product of diagonals is determinant
             product *= AM[i][i] 
-    
         return product
 
 

@@ -90,10 +90,22 @@ class Visitor:
     def visit_assignment(self, assignment:Assignment):
         expression_value = assignment.expression.accept(self)
 
-        for scope in self.variables[::-1]:
-            if assignment.identifier.value in scope:
-                scope[assignment.identifier.value] = expression_value
-        self.variables[-1][assignment.identifier.value] = expression_value
+        if not assignment.first_index:
+            for scope in self.variables[::-1]:
+                if assignment.identifier.value in scope:
+                    scope[assignment.identifier.value] = expression_value
+                    return
+            self.variables[-1][assignment.identifier.value] = expression_value
+
+        else:
+            for scope in self.variables[::-1]:
+                if assignment.identifier.value in scope:
+                    matrix:Matrix = scope[assignment.identifier.value]
+                    if not isinstance(matrix, Matrix):
+                        raise RuntimeError("You can't access in non-matrix")
+                    matrix.rows[assignment.first_index.value][assignment.second_index.value] = expression_value
+                    return
+            raise RuntimeError("You can't access in non-existing matrix")     
 
 
     def visit_identifier(self, identifier:Identifier):
@@ -175,8 +187,9 @@ class Visitor:
         if binary.op == OperatorType.LESS_OR_EQUAL:
             return left <= right
 
-        # TODO: jakas funkcja isEqual?
+        # Obsługa różnych typów poprzez __eq__
         if binary.op == OperatorType.EQUAL:
+            print("porownanie")
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:
             return left != right
