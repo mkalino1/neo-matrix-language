@@ -15,7 +15,8 @@ Klasy obiektów reprezentujacych expression
 from .Node import Node
 
 class BinaryOperator(Node):
-    def __init__(self, lvalue, op, rvalue):
+    def __init__(self, lvalue, op, rvalue, line=None, column=None):
+        super().__init__(line, column)
         self.lvalue = lvalue
         self.op = op
         self.rvalue = rvalue
@@ -28,7 +29,8 @@ class BinaryOperator(Node):
 
 
 class UnaryOperator(Node):
-    def __init__(self, op, rvalue):
+    def __init__(self, op, rvalue, line=None, column=None):
+        super().__init__(line, column)
         self.op = op
         self.rvalue = rvalue
 
@@ -40,7 +42,8 @@ class UnaryOperator(Node):
 
 
 class Scalar(Node):
-    def __init__(self, value):
+    def __init__(self, value, line=None, column=None):
+        super().__init__(line, column)
         self.value = value
 
     def __repr__(self):
@@ -51,7 +54,8 @@ class Scalar(Node):
 
 
 class Bool(Node):
-    def __init__(self, value):
+    def __init__(self, value, line=None, column=None):
+        super().__init__(line, column)
         self.value = value == "true"
 
     def __repr__(self):
@@ -62,7 +66,8 @@ class Bool(Node):
 
 
 class String(Node):
-    def __init__(self, value):
+    def __init__(self, value, line=None, column=None):
+        super().__init__(line, column)
         self.value = value
 
     def __repr__(self):
@@ -73,7 +78,8 @@ class String(Node):
 
 
 class Property(Node):
-    def __init__(self, object_name, property_name):
+    def __init__(self, object_name, property_name, line=None, column=None):
+        super().__init__(line, column)
         self.object_name = object_name
         self.property_name = property_name
 
@@ -85,10 +91,11 @@ class Property(Node):
 
 
 class Matrix(Node):
-    def __init__(self, rows):
+    def __init__(self, rows, line=None, column=None):
+        super().__init__(line, column)
         self.rows = rows
         self.properties = {}
-        self.properties['det'] = self.determinant(rows)
+        self.properties['det'] = self.determinant
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.rows}'
@@ -96,8 +103,9 @@ class Matrix(Node):
     def accept(self, visitor):
         return visitor.visit_matrix(self)
 
-    def determinant(self, A):
+    def determinant(self):
         # Section 1: Establish n parameter and copy A
+        A = self.rows
         n = len(A)
         AM = [x[:] for x in A]
     
@@ -122,7 +130,8 @@ class Matrix(Node):
 
 
 class Access(Node):
-    def __init__(self, identifier, first, second):
+    def __init__(self, identifier, first, second, line=None, column=None):
+        super().__init__(line, column)
         self.identifier = identifier
         self.first = first
         self.second = second
@@ -135,7 +144,8 @@ class Access(Node):
 
 
 class Identifier(Node):
-    def __init__(self, string):
+    def __init__(self, string, line=None, column=None):
+        super().__init__(line, column)
         self.value = string
 
     def __repr__(self):

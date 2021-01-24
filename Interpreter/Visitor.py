@@ -102,10 +102,21 @@ class Visitor:
                 print(f'Variable found: {scope[identifier.value]}')
                 return scope[identifier.value]
         
-        raise RuntimeError("Variable doesn't exist") 
+        raise RuntimeError(f"Variable doesn't exist {identifier.line} {identifier.column}") 
 
 
     def visit_matrix(self, matrix:Matrix):
+        values = []
+        for row in matrix.rows:
+            values_row = []
+            for cell in row:
+                value = cell.accept(self)
+                if not isinstance(value, int) and not isinstance(value, float):
+                    raise RuntimeError("Matrix can contain only scalars")
+                values_row.append(value)
+            values.append(values_row)
+
+        matrix.rows = values
         return matrix
 
 
@@ -122,9 +133,10 @@ class Visitor:
         object = property.object_name.accept(self)
 
         if not isinstance(object, Matrix):
-            raise RuntimeError("Only supported object is Matrix")
+            raise RuntimeError("Only supported object for now is Matrix")
 
-        return object.properties[property.property_name.value]
+        property_getter = object.properties[property.property_name.value]
+        return property_getter()
 
 
     def visit_unary_operator(self, unary:UnaryOperator):

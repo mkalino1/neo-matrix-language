@@ -16,7 +16,8 @@ class Program(Node):
 
 
 class Function(Node):
-    def __init__(self, name, parameter_list, block):
+    def __init__(self, name, parameter_list, block, line=None, column=None):
+        super().__init__(line, column)
         self.name = name
         self.parameter_list = parameter_list
         self.block = block

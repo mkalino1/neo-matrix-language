@@ -8,7 +8,8 @@ Klasy obiektów reprezentujacych instukcje
 from .Node import Node
 
 class Block(Node):
-    def __init__(self, instructions):
+    def __init__(self, instructions, line=None, column=None):
+        super().__init__(line, column)
         self.instructions = instructions
         self.passed_variables = {}
 
@@ -20,7 +21,8 @@ class Block(Node):
 
 
 class IfStatement(Node):
-    def __init__(self, condition, block, else_block):
+    def __init__(self, condition, block, else_block, line=None, column=None):
+        super().__init__(line, column)
         self.condition = condition
         self.block = block
         self.else_block = else_block
@@ -33,7 +35,8 @@ class IfStatement(Node):
 
 
 class Return(Node):
-    def __init__(self, expression):
+    def __init__(self, expression, line=None, column=None):
+        super().__init__(line, column)
         self.expression = expression
 
     def __repr__(self):
@@ -44,7 +47,8 @@ class Return(Node):
 
 
 class WhileLoop(Node):
-    def __init__(self, condition, block):
+    def __init__(self, condition, block, line=None, column=None):
+        super().__init__(line, column)
         self.condition = condition
         self.block = block
 
@@ -56,7 +60,8 @@ class WhileLoop(Node):
 
 
 class FunctionCall(Node):
-    def __init__(self, function_name, arguments_list):
+    def __init__(self, function_name, arguments_list, line=None, column=None):
+        super().__init__(line, column)
         self.function_name = function_name
         self.arguments = arguments_list
 
@@ -68,7 +73,8 @@ class FunctionCall(Node):
 
 
 class Assignment(Node):
-    def __init__(self, left_identifier, right_expression):
+    def __init__(self, left_identifier, right_expression, line=None, column=None):
+        super().__init__(line, column)
         self.identifier = left_identifier
         self.expression = right_expression
 
