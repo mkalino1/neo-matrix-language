@@ -125,6 +125,7 @@ class Matrix(Node):
         self.properties['det'] = self.determinant
         self.properties['rowlen'] = self.rowlen
         self.properties['collen'] = self.collen
+        self.properties['transposed'] = self.transposed
 
 
     def __repr__(self):
@@ -133,6 +134,10 @@ class Matrix(Node):
 
     def accept(self, visitor):
         return visitor.visit_matrix(self)
+
+
+    def __bool__(self):
+        return not all(all(num == 0 for num in row) for row in self.rows)
 
 
     def __eq__(self, other):
@@ -190,6 +195,10 @@ class Matrix(Node):
 
         return Matrix(result, self.line, self.column)
 
+    
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
 
     def __add__(self, other):
         result = []
@@ -215,8 +224,12 @@ class Matrix(Node):
         return Matrix(result, self.line, self.column)
 
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
+
     def __sub__(self, other):
-        new_rows = []
+        result = []
         if isinstance(other, Matrix):
             if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
                 raise NeoRuntimeError("Matrixes must have the same shape", self.line, self.column)
@@ -225,18 +238,22 @@ class Matrix(Node):
                 new_row = []
                 for elem1, elem2 in zip(row1, row2):
                     new_row.append(elem1 - elem2)
-                new_rows.append(new_row)
+                result.append(new_row)
 
         elif isinstance(other, float):
             for row in self.rows:
                 new_row = []
                 for elem in row:
                     new_row.append(elem - other)
-                new_rows.append(new_row)
+                result.append(new_row)
         else:
             raise NeoRuntimeError(f"You cannot substract 'Matrix' with '{other.__class__.__name__}'", self.line, self.column)
 
-        return Matrix(new_rows, self.line, self.column)
+        return Matrix(result, self.line, self.column)
+
+
+    def __rsub__(self, other):
+        return self.__sub__(other)
 
 
     def rowlen(self):
@@ -245,6 +262,11 @@ class Matrix(Node):
 
     def collen(self):
         return len(self.rows[0])
+
+
+    def transposed(self):
+        result = [[self.rows[j][i] for j in range(len(self.rows))] for i in range(len(self.rows[0]))]
+        return Matrix(result, self.line, self.column)
 
 
     def determinant(self):

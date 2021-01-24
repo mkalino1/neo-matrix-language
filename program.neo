@@ -3,8 +3,9 @@ function return_5(){
 }
 
 function second(n){
-    a = [[1.2]];
-    return -[[1, 2][3, 4]] *  [[1][2]];
+    a = [[1, 2][3, 4][5, 6]];
+    b = [[100, 2][3, 4][5, 6]];
+    return a and b;
 }
 
 second(3);

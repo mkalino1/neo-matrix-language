@@ -1,6 +1,6 @@
 from Objects.Instructions import Assignment, Block, FunctionCall, IfStatement, Return, WhileLoop
 from Objects.ToplevelObjects import Function
-from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, Scalar, UnaryOperator
+from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, UnaryOperator
 from Objects.OperatorType import OperatorType
 from Errors.InterpreterExceptions import NeoRuntimeError
     
@@ -23,10 +23,6 @@ class Visitor:
     def __init__(self):
         self.variables = [{}]
         self.functions = {}
-
-    # Scalar or bool or string
-    def visit_literal(self, literal):
-        return literal.value
 
 
     def visit_function(self, function:Function):
@@ -164,7 +160,7 @@ class Visitor:
     def visit_unary_operator(self, unary:UnaryOperator):
         right = unary.rvalue.accept(self)
 
-        # TODO: rozbudowac obsluge roznych typow. Matrix przede wszystkim
+        # Obsługa macierzy obsłużona poprzez __neg__
         if unary.op == OperatorType.MINUS:
             return -right
 
@@ -181,17 +177,33 @@ class Visitor:
         if binary.op == OperatorType.PLUS:
             return left + right
         if binary.op == OperatorType.MINUS:
+            if isinstance(left, str) or isinstance(right, str):
+                raise NeoRuntimeError(f"Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
             return left - right
         if binary.op == OperatorType.MULTIPLY:
+            if isinstance(left, str) and isinstance(right, str):
+                raise NeoRuntimeError(f"Cannot multiply two strings", binary.lvalue.line, binary.lvalue.column)
             return left * right
         if binary.op == OperatorType.DIVIDE:
-            return left / right
+            if isinstance(left, Matrix) or isinstance(right, Matrix):
+                raise NeoRuntimeError(f"Matrixes cannot take part in divide operation", binary.lvalue.line, binary.lvalue.column)
+            if isinstance(left, str) or isinstance(right, str):
+                raise NeoRuntimeError(f"Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
+            try:
+                return left / right
+            except ZeroDivisionError:
+                raise NeoRuntimeError(f"Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
 
         # Obsługa różnych typów obsłużona poprzez __eq__
         if binary.op == OperatorType.EQUAL:
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:
             return left != right
+
+        if binary.op == OperatorType.AND:
+            return left and right
+        if binary.op == OperatorType.OR:
+            return left or right
 
         # Porównania
         if binary.op == OperatorType.GREATER:
@@ -215,6 +227,9 @@ class Visitor:
             except TypeError:
                 raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '<=' operator", binary.lvalue.line, binary.lvalue.column)
 
- 
-
         raise NeoRuntimeError("Unknown binary operator", binary.line, binary.column)
+
+
+        # Scalar or bool or string
+    def visit_literal(self, literal):
+        return literal.value
