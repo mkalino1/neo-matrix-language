@@ -112,10 +112,55 @@ class Matrix(Node):
             return False       
         for row1, row2 in zip(self.rows, other.rows):
             for elem1, elem2 in zip(row1, row2):
-                print(f'Elem 1: {elem1}, Elem 2: {elem2}')
                 if elem1 != elem2:
                     return False
         return True 
+
+    def __add__(self, other):
+        new_rows = []
+        if isinstance(other, Matrix):
+            if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
+                raise RuntimeError("Matrixes must have the same shape")
+
+            for row1, row2 in zip(self.rows, other.rows):
+                new_row = []
+                for elem1, elem2 in zip(row1, row2):
+                    new_row.append(elem1 + elem2)
+                new_rows.append(new_row)
+
+        elif isinstance(other, float):
+            for row in self.rows:
+                new_row = []
+                for elem in row:
+                    new_row.append(elem + other)
+                new_rows.append(new_row)
+        else:
+            raise RuntimeError(f"You cannot add Matrix and {other.__class__.__name__}")
+
+        return Matrix(new_rows, self.line, self.column)
+
+    def __sub__(self, other):
+        new_rows = []
+        if isinstance(other, Matrix):
+            if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
+                raise RuntimeError("Matrixes must have the same shape")
+
+            for row1, row2 in zip(self.rows, other.rows):
+                new_row = []
+                for elem1, elem2 in zip(row1, row2):
+                    new_row.append(elem1 - elem2)
+                new_rows.append(new_row)
+
+        elif isinstance(other, float):
+            for row in self.rows:
+                new_row = []
+                for elem in row:
+                    new_row.append(elem - other)
+                new_rows.append(new_row)
+        else:
+            raise RuntimeError(f"You cannot substract Matrix with {other.__class__.__name__}")
+
+        return Matrix(new_rows, self.line, self.column)
 
     def rowlen(self):
         return len(self.rows)

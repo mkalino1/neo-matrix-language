@@ -35,6 +35,9 @@ class Visitor:
 
 
     def visit_function_call(self, function_call:FunctionCall):
+        if not function_call.function_name.value in self.functions:
+            raise RuntimeError(f"Function { function_call.function_name.value} doesn't exist line: {function_call.function_name.line} col: {function_call.function_name.column}") 
+
         function:Function = self.functions[function_call.function_name.value]
 
         if len(function.parameter_list) != len(function_call.arguments):
@@ -70,9 +73,9 @@ class Visitor:
         condition = if_statement.condition.accept(self)
 
         if condition:
-            if_statement.block.accept(self)
+            return if_statement.block.accept(self)
         elif if_statement.else_block:
-            if_statement.else_block.accept(self)
+            return if_statement.else_block.accept(self)
 
 
     def visit_while_loop(self, while_loop:WhileLoop):
@@ -84,7 +87,10 @@ class Visitor:
 
 
     def visit_return(self, return_instruction:Return):
-        return return_instruction.expression.accept(self)
+        print("Expression ", return_instruction.expression)
+        return_value = return_instruction.expression.accept(self)
+        print("Return value ", return_value)
+        return return_value
 
 
     def visit_assignment(self, assignment:Assignment):
@@ -98,12 +104,14 @@ class Visitor:
             self.variables[-1][assignment.identifier.value] = expression_value
 
         else:
+            if not (assignment.first_index.value.is_integer() and assignment.second_index.value.is_integer()):
+                raise RuntimeError("Indieces of matrix must be whole numbers")
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
                     matrix:Matrix = scope[assignment.identifier.value]
                     if not isinstance(matrix, Matrix):
                         raise RuntimeError("You can't access in non-matrix")
-                    matrix.rows[assignment.first_index.value][assignment.second_index.value] = expression_value
+                    matrix.rows[int(assignment.first_index.value)][int(assignment.second_index.value)] = expression_value
                     return
             raise RuntimeError("You can't access in non-existing matrix")     
 
@@ -114,7 +122,7 @@ class Visitor:
                 print(f'Variable found: {scope[identifier.value]}')
                 return scope[identifier.value]
         
-        raise RuntimeError(f"Variable doesn't exist {identifier.line} {identifier.column}") 
+        raise RuntimeError(f"Variable {identifier.value} doesn't exist line: {identifier.line} col: {identifier.column}") 
 
 
     def visit_matrix(self, matrix:Matrix):
@@ -123,7 +131,7 @@ class Visitor:
             values_row = []
             for cell in row:
                 value = cell.accept(self)
-                if not isinstance(value, int) and not isinstance(value, float):
+                if not isinstance(value, float):
                     raise RuntimeError("Matrix can contain only scalars")
                 values_row.append(value)
             values.append(values_row)
@@ -135,10 +143,15 @@ class Visitor:
     def visit_access(self, access:Access):
         matrix = access.identifier.accept(self)
 
+        print(access.first)
+
+        if not (access.first.value.is_integer() and access.second.value.is_integer()):
+            raise RuntimeError("Indieces must be whole numbers")
+
         if not isinstance(matrix, Matrix):
             raise RuntimeError("Matrix is needed for access operation")
 
-        return matrix.rows[access.first.value][access.second.value]
+        return matrix.rows[int(access.first.value)][int(access.second.value)]
                 
 
     def visit_property(self, property:Property):

@@ -1,9 +1,23 @@
-function hej(raz, dwa, trzy){
-    b = 1;
-    # a = [[5, 5][5, dwa]];
-    # b = [[5, 5][5, dwa]];
-    a = 1.0;
-    return a == b;
+function recur_fibo(n){
+   if (n <= 1){
+        return n;
+   }
+   else{
+       return recur_fibo(n-1) + recur_fibo(n-2);
+   }
 }
 
-hej(-10, 1, 6);
+
+recur_fibo(2);
+
+
+function first(n){
+    return n + 10;
+}
+
+function second(n){
+    a = first(n);
+    return a + 100;
+}
+
+# second(3);

@@ -93,10 +93,11 @@ class Lexer:
                 buffer += self.source.current_char
                 self.source.move_to_next_char()
 
-            self.token = Token(TokenType.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
-            return                     
-        else:
-            self.token = Token(TokenType.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
+        #     self.token = Token(TokenType.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
+        #     return                     
+        # else:
+        #     self.token = Token(TokenType.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
+        self.token = Token(TokenType.SCALAR, float(buffer))
         return                         
 
 

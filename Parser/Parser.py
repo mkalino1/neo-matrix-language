@@ -221,6 +221,7 @@ class Parser:
         first_index, second_index = None, None
         if access := self.try_parse_access_with_consumed_identifier(identifier):
             first_index, second_index = access.first, access.second
+
         self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
         self.expect(TokenType.SEMICOLON)
