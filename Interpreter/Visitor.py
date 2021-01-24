@@ -2,6 +2,7 @@ from Objects.Instructions import Assignment, Block, FunctionCall, IfStatement, R
 from Objects.ToplevelObjects import Function
 from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, Scalar, UnaryOperator
 from Objects.OperatorType import OperatorType
+from Errors.InterpreterExceptions import NeoRuntimeError
     
 class Interpreter():
     def __init__(self, parsed_program):
@@ -9,16 +10,14 @@ class Interpreter():
         self.visitor = Visitor()
 
     def run(self):
-        # try:
-            # value = evaluate(expression)
-            # print(value)
         for top_level_object in self.parsed_objects:
-            print(f'TOP LEVEL: {top_level_object.accept(self.visitor)}')
-        # except RuntimeError: 
-        #     print("Error has occured")
+            try:
+                print(f'TOP LEVEL: {top_level_object.accept(self.visitor)}')
+            except NeoRuntimeError as e:
+                print(e)
+                return
         return "Job is done"
-
-                
+  
 
 class Visitor:
     def __init__(self):
@@ -36,12 +35,12 @@ class Visitor:
 
     def visit_function_call(self, function_call:FunctionCall):
         if not function_call.function_name.value in self.functions:
-            raise RuntimeError(f"Function { function_call.function_name.value} doesn't exist line: {function_call.function_name.line} col: {function_call.function_name.column}") 
+            raise NeoRuntimeError(f"Function { function_call.function_name.value} doesn't exist", function_call.function_name.line, function_call.function_name.column) 
 
         function:Function = self.functions[function_call.function_name.value]
 
         if len(function.parameter_list) != len(function_call.arguments):
-            raise RuntimeError("Incorrect number of arguments")
+            raise NeoRuntimeError("Incorrect number of arguments", function_call.function_name.line, function_call.function_name.column)
 
         for param, arg in zip(function.parameter_list, function_call.arguments):
             function.block.passed_variables[param.value] = arg.accept(self)
@@ -50,7 +49,7 @@ class Visitor:
 
 
     def visit_block(self, block:Block):
-        print(f'Weszlismy w blok, instrukcje: {block.instructions}, zmienne passed: {block.passed_variables}')
+        # print(f'Weszlismy w blok, instrukcje: {block.instructions}, zmienne passed: {block.passed_variables}')
 
         self.variables.append({})
 
@@ -59,11 +58,8 @@ class Visitor:
 
         return_value = None
         for instruction in block.instructions:
-            if isinstance(instruction, Return):
-                print("Pierwsze wystapienie return instruction osiagniete")
-                return_value = instruction.accept(self)
-                break 
-            instruction.accept(self)
+            if return_value := instruction.accept(self):
+                break
 
         self.variables.pop()
         return return_value
@@ -87,10 +83,9 @@ class Visitor:
 
 
     def visit_return(self, return_instruction:Return):
-        print("Expression ", return_instruction.expression)
-        return_value = return_instruction.expression.accept(self)
-        print("Return value ", return_value)
-        return return_value
+        if return_instruction.expression is None:
+            return None
+        return return_instruction.expression.accept(self)
 
 
     def visit_assignment(self, assignment:Assignment):
@@ -105,24 +100,24 @@ class Visitor:
 
         else:
             if not (assignment.first_index.value.is_integer() and assignment.second_index.value.is_integer()):
-                raise RuntimeError("Indieces of matrix must be whole numbers")
+                raise NeoRuntimeError("Indieces of matrix must be whole numbers", assignment.line, assignment.column)
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
                     matrix:Matrix = scope[assignment.identifier.value]
                     if not isinstance(matrix, Matrix):
-                        raise RuntimeError("You can't access in non-matrix")
+                        raise NeoRuntimeError("You can't use access in non-matrix", assignment.line, assignment.column)
                     matrix.rows[int(assignment.first_index.value)][int(assignment.second_index.value)] = expression_value
                     return
-            raise RuntimeError("You can't access in non-existing matrix")     
+            raise NeoRuntimeError("You can't use access in non-existing matrix", assignment.line, assignment.column)     
 
 
     def visit_identifier(self, identifier:Identifier):
         for scope in self.variables[::-1]:
             if identifier.value in scope:
-                print(f'Variable found: {scope[identifier.value]}')
+                # print(f'Variable found: {scope[identifier.value]}')
                 return scope[identifier.value]
         
-        raise RuntimeError(f"Variable {identifier.value} doesn't exist line: {identifier.line} col: {identifier.column}") 
+        raise NeoRuntimeError(f"Variable {identifier.value} doesn't exist", identifier.line, identifier.column) 
 
 
     def visit_matrix(self, matrix:Matrix):
@@ -132,7 +127,7 @@ class Visitor:
             for cell in row:
                 value = cell.accept(self)
                 if not isinstance(value, float):
-                    raise RuntimeError("Matrix can contain only scalars")
+                    raise NeoRuntimeError("Matrix can contain only scalars", matrix.line, matrix.column)
                 values_row.append(value)
             values.append(values_row)
 
@@ -143,13 +138,11 @@ class Visitor:
     def visit_access(self, access:Access):
         matrix = access.identifier.accept(self)
 
-        print(access.first)
-
         if not (access.first.value.is_integer() and access.second.value.is_integer()):
-            raise RuntimeError("Indieces must be whole numbers")
+            raise NeoRuntimeError("Indieces must be whole numbers", access.line, access.column)
 
         if not isinstance(matrix, Matrix):
-            raise RuntimeError("Matrix is needed for access operation")
+            raise NeoRuntimeError("Matrix is needed for access operation", access.line, access.column)
 
         return matrix.rows[int(access.first.value)][int(access.second.value)]
                 
@@ -158,7 +151,7 @@ class Visitor:
         object = property.object_name.accept(self)
 
         if not isinstance(object, Matrix):
-            raise RuntimeError("Only supported object for now is Matrix")
+            raise NeoRuntimeError("Only supported object for now is Matrix", property.line, property.column)
 
         property_getter = object.properties[property.property_name.value]
         return property_getter()
@@ -174,7 +167,7 @@ class Visitor:
         if unary.op == OperatorType.NOT:
             return not bool(right)
 
-        raise RuntimeError("Unknown unary operator")
+        raise NeoRuntimeError("Unknown unary operator", unary.line, unary.column)
 
 
     def visit_binary_operator(self, binary:BinaryOperator):
@@ -202,9 +195,8 @@ class Visitor:
 
         # Obsługa różnych typów poprzez __eq__
         if binary.op == OperatorType.EQUAL:
-            print("porownanie")
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:
             return left != right
 
-        raise RuntimeError("Unknown binary operator")
+        raise NeoRuntimeError("Unknown binary operator", binary.line, binary.column)

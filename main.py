@@ -9,4 +9,4 @@ parsed_program = parser.parse_program()
 interpreter = Interpreter(parsed_program)
 
 
-print(interpreter.run())
+interpreter.run()
