@@ -4,7 +4,7 @@ function return_5(){
 
 function second(n){
     a = [[1.2]];
-    return [[1, 2][3, 4]] *  [[1][2]];
+    return -[[1, 2][3, 4]] *  [[1][2]];
 }
 
 second(3);

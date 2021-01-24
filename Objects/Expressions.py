@@ -147,32 +147,52 @@ class Matrix(Node):
         return True 
 
 
+    def __neg__(self):
+        result = []
+        for row in self.rows:
+            new_row = []
+            for elem in row:
+                new_row.append(-elem)
+            result.append(new_row)
+        return Matrix(result, self.line, self.column)
+
+
     def __mul__(self, other):
-        # TODO:obsluzyc przypadek niematrix
+        result = []
 
-        x_rows = len(self.rows)
-        x_cols = len(self.rows[0])
-        y_rows = len(other.rows)
-        y_cols = len(other.rows[0])
+        if isinstance(other, Matrix):
+            x_rows = len(self.rows)
+            x_cols = len(self.rows[0])
+            y_rows = len(other.rows)
+            y_cols = len(other.rows[0])
 
-        if x_cols != y_rows:
-            raise NeoRuntimeError("Wrong shapes of matrixes. Cannot multiply", self.line, self.column)
+            if x_cols != y_rows:
+                raise NeoRuntimeError("Wrong shapes of matrixes. Cannot multiply", self.line, self.column)
 
-        result = [[0 for _ in range(y_cols)] for _ in range(x_rows)]
+            result = [[0 for _ in range(y_cols)] for _ in range(x_rows)]
 
-        # iterate through rows of X
-        for i in range(x_rows):
-            # iterate through columns of Y
-            for j in range(y_cols):
-                # iterate through rows of Y
-                for k in range(y_rows):
-                    result[i][j] += self.rows[i][k] * other.rows[k][j]
+            # iterate through rows of X
+            for i in range(x_rows):
+                # iterate through columns of Y
+                for j in range(y_cols):
+                    # iterate through rows of Y
+                    for k in range(y_rows):
+                        result[i][j] += self.rows[i][k] * other.rows[k][j]
+
+        elif isinstance(other, float):
+            for row in self.rows:
+                new_row = []
+                for elem in row:
+                    new_row.append(elem * other)
+                result.append(new_row)
+        else:
+            raise NeoRuntimeError(f"You cannot multiply 'Matrix' and '{other.__class__.__name__}'", self.line, self.column)
 
         return Matrix(result, self.line, self.column)
 
 
     def __add__(self, other):
-        new_rows = []
+        result = []
         if isinstance(other, Matrix):
             if self.properties["rowlen"]() != other.properties["rowlen"]() or self.properties["collen"]() != other.properties["collen"]():
                 raise NeoRuntimeError("Matrixes must have the same shape", self.line, self.column)
@@ -181,18 +201,18 @@ class Matrix(Node):
                 new_row = []
                 for elem1, elem2 in zip(row1, row2):
                     new_row.append(elem1 + elem2)
-                new_rows.append(new_row)
+                result.append(new_row)
 
         elif isinstance(other, float):
             for row in self.rows:
                 new_row = []
                 for elem in row:
                     new_row.append(elem + other)
-                new_rows.append(new_row)
+                result.append(new_row)
         else:
             raise NeoRuntimeError(f"You cannot add 'Matrix' and '{other.__class__.__name__}'", self.line, self.column)
 
-        return Matrix(new_rows, self.line, self.column)
+        return Matrix(result, self.line, self.column)
 
 
     def __sub__(self, other):

@@ -178,7 +178,6 @@ class Visitor:
         left = binary.lvalue.accept(self)
         right = binary.rvalue.accept(self)
 
-        # TODO: konkatenacja stringow
         if binary.op == OperatorType.PLUS:
             return left + right
         if binary.op == OperatorType.MINUS:
