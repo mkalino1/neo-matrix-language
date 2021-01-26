@@ -65,7 +65,10 @@ class Visitor:
 
         return_value = None
         for instruction in block.instructions:
-            if return_value := instruction.accept(self):
+            if return_value is None:
+                if (return_value := instruction.accept(self)):
+                    break
+            else:
                 break
 
         if block.is_function_body:
@@ -85,9 +88,13 @@ class Visitor:
     def visit_while_loop(self, while_loop:WhileLoop):
         condition = while_loop.condition.accept(self)
 
+        return_value = None
         while condition:
-            while_loop.block.accept(self)
-            condition = while_loop.condition.accept(self)
+            return_value = while_loop.block.accept(self)
+            if (return_value is None):
+                condition = while_loop.condition.accept(self)
+            else:
+                return return_value
 
 
     def visit_return(self, return_instruction:Return):
