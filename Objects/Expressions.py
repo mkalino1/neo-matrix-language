@@ -130,7 +130,23 @@ class Matrix(Node):
 
 
     def __repr__(self):
-        return '\n'.join([repr(row) for row in self.rows])
+        # Find the max width of each column
+        col_widths = []
+        num_cols = len(self.rows[0])
+        for col in range(num_cols):
+            max_width = max(len(str(row[col])) for row in self.rows)
+            col_widths.append(max_width)
+        # Prepare the border
+        border = '-' * (sum(col_widths) + 3 * num_cols + 1)
+        # Prepare each row with padded cells
+        repr_rows = []
+        for row in self.rows:
+            cells = [
+                str(cell).rjust(col_widths[i])
+                for i, cell in enumerate(row)
+            ]
+            repr_rows.append('| ' + '   '.join(cells) + ' |')
+        return '\n'.join([border] + repr_rows + [border])
 
 
     def accept(self, visitor):
