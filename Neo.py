@@ -9,16 +9,23 @@ parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="Pass path to Neo program to interpret", type=str)
 args = parser.parse_args()
 
-# source_string = """
-# m = [[1, 2, 3][4, 5, 6][7, 8, 8]];
-# m = m.transposed;
+source_string = """
+n = zeros(9);
+m = [[1, 2, 3][444, 5, 6][7, 8, 8]];
+m = m.transposed;
 
-# print(m);
-# print(m.det);
-# """
+print(m);
+print(m.det);
+print(n);
 
-# source = SourceString(source_string)
-source = SourceFile(args.filename)
+A = [[1, 2][3, 4]];
+B = [[5, 6][7, 8]];
+C = A + B;
+print(C);
+"""
+
+source = SourceString(source_string)
+# source = SourceFile(args.filename)
 lexer = Lexer(source)
 parser = Parser(lexer)
 

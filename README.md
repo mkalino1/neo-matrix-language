@@ -8,8 +8,8 @@ The interpreter reads and executes Neo source files, allowing users to perform m
 Suppose you have a Neo source file called `example.neo`:
 
 ```neo
-A = [[1, 2], [3, 4]]
-B = [[5, 6], [7, 8]]
+A = [[1, 2][3, 4]]
+B = [[5, 6][7, 8]]
 C = A + B
 print(C)
 ```
