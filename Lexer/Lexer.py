@@ -36,7 +36,7 @@ class Lexer:
         elif self.try_build_special_character():
             pass
         else:
-            raise LexerError(ErrorCode.CANT_IDENTIFY_TOKEN, position)
+            raise LexerError(ErrorCode.CANT_IDENTIFY_TOKEN, position, self.source.current_char)
 
         self.token.set_position(position)
 
@@ -165,8 +165,8 @@ class Lexer:
 
 
     def skip_whitespace(self):
-        if self.source.current_char == ' ' or self.source.current_char == '\n':
-            while self.source.current_char == ' ' or self.source.current_char == '\n':
+        if self.source.current_char == ' ' or self.source.current_char == '\n' or self.source.current_char == '\t' or self.source.current_char == '\r':
+            while self.source.current_char == ' ' or self.source.current_char == '\n' or self.source.current_char == '\t' or self.source.current_char == '\r':
                 self.source.move_to_next_char()
             return True
         return False

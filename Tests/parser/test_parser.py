@@ -1,13 +1,16 @@
+import pytest
 from Lexer.Token import TokenType
 from Objects.ToplevelObjects import Function
 from Objects.Instructions import Block, FunctionCall, IfStatement, Return
 from Objects.Expressions import *
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
+from Lexer.Source import SourceFile
+from Objects.OperatorType import OperatorType
 
 
 def test_literals():
-    parser = Parser(Lexer(filename="./Tests/ParserTestFiles/literals.neo"))
+    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/literals.neo")))
     assignments = (x for x in parser.parse_program().toplevel_objects)
 
     assert isinstance(next(assignments).expression, Matrix)
@@ -21,7 +24,7 @@ def test_literals():
 
 
 def test_order_of_operations():
-    parser = Parser(Lexer(filename="./Tests/ParserTestFiles/order.neo"))
+    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/order.neo")))
     objects = (x for x in parser.parse_program().toplevel_objects)
 
     assert isinstance(next(objects).expression.lvalue, BinaryOperator)
@@ -29,22 +32,22 @@ def test_order_of_operations():
     assert isinstance(next(objects).expression.lvalue, Scalar)
 
     expression = next(objects).expression
-    assert expression.op == TokenType.EQUAL_TO
-    assert expression.lvalue.op == TokenType.LESS_OR_EQUAL_TO
-    assert expression.rvalue.op == TokenType.GREATER_OR_EQUAL_TO
+    assert expression.op == OperatorType.EQUAL
+    assert expression.lvalue.op == OperatorType.LESS_OR_EQUAL
+    assert expression.rvalue.op == OperatorType.GREATER_OR_EQUAL
 
     expression = next(objects).expression
-    assert expression.op == TokenType.AND
+    assert expression.op == OperatorType.AND
 
     expression = next(objects).expression
-    assert expression.op == TokenType.MINUS
+    assert expression.op == OperatorType.MINUS
 
     expression = next(objects).expression
-    assert expression.op == TokenType.NOT
+    assert expression.op == OperatorType.NOT
 
 
 def test_function():
-    parser = Parser(Lexer(filename="./Tests/ParserTestFiles/function.neo"))
+    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/function.neo")))
     objects = (x for x in parser.parse_program().toplevel_objects)
     fun = next(objects)
     assert isinstance(fun, Function)
