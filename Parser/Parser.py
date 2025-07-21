@@ -128,11 +128,11 @@ class Parser:
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
 
-        # w takim razie instrukcja powinna zaczynać się identyfikatorem
+        # in that case, the instruction should start with an identifier
         identifier_token = self.expect(TokenType.IDENTIFIER)
         first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
 
-        # jesli wywołanie funkcji wystepuje jako samotna instrukcja to musi konczyc sie średnikiem
+        # if a function call is a standalone instruction, it must end with a semicolon
         if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): 
             self.expect(TokenType.SEMICOLON)
             return funcall_trial
@@ -370,7 +370,7 @@ class Parser:
 
     def try_parse_matrix(self):
         """
-        Matrix = ‘[‘ {MatrixRow} ‘]’ ;
+        Matrix = ‘[‘ MatrixRow {'|' MatrixRow} ‘]’ ;
         """
         if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None
@@ -381,7 +381,7 @@ class Parser:
             rows.append(self.parse_matrix_row())
         self.expect(TokenType.CL_SQUARE_BRACKET)
 
-        # jesli wszystkie wiersze nie maja równych długości
+        # if not all rows have equal length
         if len([None for row in rows if len(row)==len(rows[0])]) != len(rows):
             raise InvalidMatrix((first_token_of_matrix.line, first_token_of_matrix.column))
         if len(rows) == 0:
@@ -391,15 +391,17 @@ class Parser:
 
     def parse_matrix_row(self):
         """
-        MatrixRow = ‘<’ Scalar {‘,’ Scalar } ‘>’ ;
+        MatrixRow =  Scalar {',' Scalar } ;
         """
-        self.expect(TokenType.OP_SQUARE_BRACKET)
         scalars = [self.parse_expression()]
 
-        while not self.check_type(TokenType.CL_SQUARE_BRACKET):
+        while not self.check_type(TokenType.DELIMITER) and not self.check_type(TokenType.CL_SQUARE_BRACKET): 
             self.expect(TokenType.COMMA)
             scalars.append(self.parse_expression())
-        self.expect(TokenType.CL_SQUARE_BRACKET)
+        
+        # if there is a delimiter, consume it
+        if self.check_type(TokenType.DELIMITER):
+            self.consume()
         return scalars
 
 

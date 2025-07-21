@@ -1,6 +1,6 @@
 # Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
 
-a = [[1, 2][4, 5]];
+a = [1, 2 | 4, 5];
 b = 5;
 c = True;
 d = "Hello";

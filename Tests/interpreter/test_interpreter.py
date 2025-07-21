@@ -69,7 +69,7 @@ programs_and_outputs = [
     (
         """
 		function fun(arg){
-		    m = [[3, 2][3, 4]];
+		    m = [3, 2 | 3, 4];
 		    i = 1;
 		    while(i < m.det and 1 >= 0){
 		        if(i != arg){
@@ -93,13 +93,13 @@ programs_and_outputs = [
     ),
     (
         """
-		if([[0]]){
+		if([0]){
 		    print(0);
 		}
-		if([[0, 0][0, 0][0, 0]]){
+		if([0, 0 | 0, 0 | 0, 0]){
 		    print(1);
 		}
-		if([[0.1]]){
+		if([0.1]){
 		    print(2);
 		}
 		if(""){
@@ -130,8 +130,8 @@ programs_and_outputs = [
     ),
     (
         """
-		m = [[1, 2][3, 4]];
-		n = [[11, 22][33, 44]];
+		m = [1, 2 | 3, 4];
+		n = [11, 22 | 33, 44];
 
 		print(10+m*2);
 		print(-10-m*2);

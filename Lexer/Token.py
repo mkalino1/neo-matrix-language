@@ -19,6 +19,7 @@ class TokenType(Enum):
     SEMICOLON = auto()
     COMMA = auto()
     DOT = auto()
+    DELIMITER = auto()
 
     OP_ROUND_BRACKET = auto()
     CL_ROUND_BRACKET = auto()
@@ -61,7 +62,8 @@ class Symbol:
         ';': TokenType.SEMICOLON,
         ',': TokenType.COMMA,
         '.': TokenType.DOT,
-        '=': TokenType.ASSIGN
+        '=': TokenType.ASSIGN,
+        '|': TokenType.DELIMITER
     }
 
     double_operators = {
