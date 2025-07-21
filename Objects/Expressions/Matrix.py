@@ -12,20 +12,64 @@ class Matrix(Node):
         self.properties['transposed'] = self.transposed
         self.properties['copy'] = self.copy
 
+    
+    """
+    Returns a pretty formatted string representation of the Matrix object.
+    Handles matrices containing other matrices (nested), aligning and centering each cell's content.
+    """
     def __repr__(self):
-        col_widths = []
+        def cell_to_lines(cell):
+            if isinstance(cell, Matrix):
+                cell_lines = str(cell).split('\n')
+                return cell_lines
+            else:
+                return [str(cell)]
+        
         num_cols = len(self.rows[0])
-        for col in range(num_cols):
-            max_width = max(len(str(row[col])) for row in self.rows)
-            col_widths.append(max_width)
-        border = '-' * (sum(col_widths) + 3 * num_cols + 1)
-        repr_rows = []
+        
+        # For each cell, get its string lines
+        cell_lines_matrix = []
         for row in self.rows:
-            cells = [
-                str(cell).rjust(col_widths[i])
-                for i, cell in enumerate(row)
-            ]
-            repr_rows.append('| ' + '   '.join(cells) + ' |')
+            cell_lines_row = []
+            for cell in row:
+                cell_lines_row.append(cell_to_lines(cell))
+            cell_lines_matrix.append(cell_lines_row)
+        
+        # For each column, determine the max width (across all lines of all cells in that column)
+        col_widths = []
+        for col in range(num_cols):
+            max_width = 0
+            for row in cell_lines_matrix:
+                cell_lines = row[col]
+                for line in cell_lines:
+                    max_width = max(max_width, len(line))
+            col_widths.append(max_width)
+        
+        # For each row, determine the max height (number of lines) for each cell in that row
+        row_heights = []
+        for row in cell_lines_matrix:
+            max_height = max(len(cell_lines) for cell_lines in row)
+            row_heights.append(max_height)
+        
+        # Build the string representation row by row, line by line
+        repr_rows = []
+        for row_idx, row in enumerate(cell_lines_matrix):
+            max_height = row_heights[row_idx]
+            # For each line in the row (up to max_height)
+            for line_idx in range(max_height):
+                cells = []
+                for col_idx, cell_lines in enumerate(row):
+                    width = col_widths[col_idx]
+                    # If this cell has enough lines, use it, else use empty string
+                    if line_idx < len(cell_lines):
+                        cell_line = cell_lines[line_idx]
+                    else:
+                        cell_line = ""
+                    # Center the value in the cell (numbers and matrices)
+                    cells.append(cell_line.center(width))
+                repr_rows.append('| ' + '   '.join(cells) + ' |')
+        
+        border = '-' * (sum(col_widths) + 3 * num_cols + 1)
         return '\n'.join([border] + repr_rows + [border])
 
     def accept(self, visitor):
@@ -158,8 +202,15 @@ class Matrix(Node):
         return Matrix(result, self.line, self.column)
 
     def determinant(self):
+        if self.properties["rowlen"]() != self.properties["collen"]():
+            raise NeoRuntimeError("Matrix must be square to calculate determinant", self.line, self.column)
+
+        if not all(isinstance(elem, (int, float)) for row in self.rows for elem in row):
+            raise NeoRuntimeError("Matrix determinant can only be calculated for matrices of scalars", self.line, self.column)
+        
         def getMatrixMinor(m,i,j):
             return [row[:j] + row[j+1:] for row in (m[:i]+m[i+1:])]
+
         def getMatrixDeternminant(m):
             if len(m) == 2:
                 return m[0][0]*m[1][1]-m[0][1]*m[1][0]

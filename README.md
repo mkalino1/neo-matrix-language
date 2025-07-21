@@ -8,20 +8,13 @@ The interpreter reads and executes Neo source files, allowing users to perform m
 Suppose you have a Neo source file called `example.neo`:
 
 ```neo
-matrix1 = [1, 2, 3 | 4, 5, 6];
-matrix2 = [7, 8 | 9, 10 | 11, 12];
-matrix3 = matrix1 * matrix2;
+firstMatrix = [1, 2, 3 | 4, 5, 6];
+secondMatrix = [1, 2 | 3, 4 | 5, 6];
+multiplied = firstMatrix * secondMatrix;
 
-print("Matrix1: ");
-print(matrix1);
+resultMatrix = ["First matrix", "Second matrix", "Multiplied", "Transposed" | firstMatrix, secondMatrix, multiplied, multiplied.transposed];
 
-print("Matrix2: ");
-print(matrix2);
-
-print("Matrix3: ");
-print(matrix3);
-
-print("Determinant of matrix3: ", matrix3.det);
+print(resultMatrix);
 ```
 
 You can run it with:
@@ -32,21 +25,12 @@ python Neo.py example.neo
 
 **Output:**
 ```
-Matrix1: 
--------------------
-| 1.0   2.0   3.0 |
-| 4.0   5.0   6.0 |
--------------------
-Matrix2:
----------------
-|  7.0    8.0 |
-|  9.0   10.0 |
-| 11.0   12.0 |
----------------
-Matrix3:
------------------
-|  58.0    64.0 |
-| 139.0   154.0 |
------------------
-Determinant of matrix3:  36.0
+---------------------------------------------------------------------------
+|     First matrix      Second matrix      Multiplied        Transposed   |
+| -------------------   -------------   ---------------   --------------- |
+| | 1.0   2.0   3.0 |   | 1.0   2.0 |   | 22.0   28.0 |   | 22.0   49.0 | |
+| | 4.0   5.0   6.0 |   | 3.0   4.0 |   | 49.0   64.0 |   | 28.0   64.0 | |
+| -------------------   | 5.0   6.0 |   ---------------   --------------- |
+|                       -------------                                     |
+---------------------------------------------------------------------------
 ```

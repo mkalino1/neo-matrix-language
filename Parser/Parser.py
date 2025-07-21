@@ -395,6 +395,7 @@ class Parser:
         """
         scalars = [self.parse_expression()]
 
+        # while not at the delimiter or closing bracket, keep parsing comma separated scalars
         while not self.check_type(TokenType.DELIMITER) and not self.check_type(TokenType.CL_SQUARE_BRACKET): 
             self.expect(TokenType.COMMA)
             scalars.append(self.parse_expression())

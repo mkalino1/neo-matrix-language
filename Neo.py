@@ -11,20 +11,13 @@ args = parser.parse_args()
 
 source_string = """
 n = zeros(9);
-matrix1 = [1, 2, 3 | 4, 5, 6];
-matrix2 = [7, 8 | 9, 10 | 11, 12];
-matrix3 = matrix1 * matrix2;
+firstMatrix = [1, 2, 3 | 4, 5, 6];
+secondMatrix = [1, 2 | 3, 4 | 5, 6];
+multiplied = firstMatrix * secondMatrix;
 
-print("Matrix1: ");
-print(matrix1);
+resultMatrix = ["First matrix", "Second matrix", "Multiplied", "Transposed" | firstMatrix, secondMatrix, multiplied, multiplied.transposed];
 
-print("Matrix2: ");
-print(matrix2);
-
-print("Matrix3: ");
-print(matrix3);
-
-print("Determinant of matrix3: ", matrix3.det);
+print(resultMatrix);
 """
 
 source = SourceString(source_string)

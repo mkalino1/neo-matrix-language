@@ -56,11 +56,11 @@ class Visitor:
 
 
     def visit_block(self, block:Block):
-        # tworzenie nowego scope
+        # creating a new scope
         if block.is_function_body:
             self.variables.append({})
 
-        # jeśli blok ten jest ciałem funkcji to trzeba dołączyć przekazane jako argumenty zmienne
+        # if block is a function body, update the current scope with the passed variables
         self.variables[-1].update(block.passed_variables)
 
         return_value = None
@@ -106,7 +106,7 @@ class Visitor:
     def visit_assignment(self, assignment:Assignment):
         expression_value = assignment.expression.accept(self)
 
-        # Zapisywać zmienne można wyłącznie w bieżącym scope
+        # Variables can only be assigned in the current scope
         if not assignment.first_index:
             self.variables[-1][assignment.identifier.value] = expression_value
 
@@ -140,8 +140,6 @@ class Visitor:
             values_row = []
             for cell in row:
                 value = cell.accept(self)
-                if not isinstance(value, float):
-                    raise NeoRuntimeError("Matrix can contain only scalars", matrix.line, matrix.column)
                 values_row.append(value)
             values.append(values_row)
 
@@ -178,7 +176,7 @@ class Visitor:
     def visit_unary_operator(self, unary:UnaryOperator):
         right = unary.rvalue.accept(self)
 
-        # Obsługa macierzy obsłużona poprzez __neg__
+        # Matrix handling is done through __neg__
         if unary.op == OperatorType.MINUS:
             return -right
 
@@ -212,7 +210,7 @@ class Visitor:
             except ZeroDivisionError:
                 raise NeoRuntimeError(f"Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
 
-        # Przypadki różnych typów obsłużone poprzez __eq__
+        # Different types handling is done through __eq__
         if binary.op == OperatorType.EQUAL:
             return left == right
         if binary.op == OperatorType.NOT_EQUAL:
@@ -223,7 +221,7 @@ class Visitor:
         if binary.op == OperatorType.OR:
             return left or right
 
-        # Porównania
+        # Comparisons
         if binary.op == OperatorType.GREATER:
             try: 
                 return left > right
