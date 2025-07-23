@@ -419,15 +419,23 @@ class Parser:
 
     def try_parse_access_with_consumed_identifier(self, identifier):
         """
-        MatrixAccess = Identifier ‘[‘ Scalar ‘]’ ‘[‘ Scalar ‘]’
+        MatrixAccess = Identifier ‘[‘ Scalar ‘,’ Scalar ‘]’ | Identifier ‘[‘ Scalar ‘]’
         """
         if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None
         self.consume()
+
         first_expression = self.parse_expression()
+        second_expression = None
+
+        if self.check_type(TokenType.COMMA):
+            self.consume()
+            second_expression = self.parse_expression()
+        else:
+            # Shorthand syntax for single index access
+            second_expression = first_expression
+            first_expression = Scalar(0, first_expression.line, first_expression.column)
+
         self.expect(TokenType.CL_SQUARE_BRACKET)
 
-        self.expect(TokenType.OP_SQUARE_BRACKET)
-        second_expression = self.parse_expression()
-        self.expect(TokenType.CL_SQUARE_BRACKET)
         return Access(identifier, first_expression, second_expression, identifier.line, identifier.column)

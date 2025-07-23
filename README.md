@@ -12,7 +12,10 @@ firstMatrix = [1, 2, 3 | 4, 5, 6];
 secondMatrix = [1, 2 | 3, 4 | 5, 6];
 multiplied = firstMatrix * secondMatrix;
 
-resultMatrix = ["First matrix", "Second matrix", "Multiplied", "Transposed" | firstMatrix, secondMatrix, multiplied, multiplied.transposed];
+resultMatrix = [
+  "First matrix", "Second matrix", "Multiplied", "Transposed" |
+  firstMatrix, secondMatrix, multiplied, multiplied.transposed
+];
 
 print(resultMatrix);
 ```

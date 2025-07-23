@@ -51,7 +51,7 @@ programs_and_outputs = [
 		while(i < m.rowlen){
 		    j = 0;
 		    while( j < m.collen){
-		        m[i][j] = i * j;
+		        m[i, j] = i * j;
 		        j = j+1;
 		    }
 		    i = i+1;
@@ -153,7 +153,7 @@ programs_and_outputs = [
         """
 		m = zeros(2);
 		n = m.copy;
-		m[0][0] = 5;
+		m[0, 0] = 5;
 
 		print(n);
 		print(m);

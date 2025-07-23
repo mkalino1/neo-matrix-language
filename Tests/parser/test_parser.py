@@ -20,6 +20,7 @@ def test_literals():
     assert isinstance(next(assignments).expression, FunctionCall)
     assert isinstance(next(assignments).expression, Property)
     assert isinstance(next(assignments).expression, Access)
+    assert isinstance(next(assignments).expression, Access)
     assert isinstance(next(assignments).expression, Identifier)
 
 
