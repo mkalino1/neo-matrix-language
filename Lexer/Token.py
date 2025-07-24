@@ -14,6 +14,7 @@ class TokenType(Enum):
     MINUS = auto()
     MULTIPLY = auto()
     DIVIDE = auto()
+    POWER = auto()
     ASSIGN = auto()
 
     SEMICOLON = auto()
@@ -59,6 +60,7 @@ class Symbol:
         '/': TokenType.DIVIDE,
         '+': TokenType.PLUS,
         '-': TokenType.MINUS,
+        '^': TokenType.POWER,
         ';': TokenType.SEMICOLON,
         ',': TokenType.COMMA,
         '.': TokenType.DOT,

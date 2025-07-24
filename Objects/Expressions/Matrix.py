@@ -125,6 +125,22 @@ class Matrix(Node):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __pow__(self, other):
+        if not isinstance(other, (int, float)) or other < 0:
+            raise NeoRuntimeError("Matrix power can only be calculated for non-negative numbers", self.line, self.column)
+
+        n = len(self.rows)
+        if n != len(self.rows[0]):
+            raise NeoRuntimeError("Only square matrices can be raised to a power", self.line, self.column)
+        if other == 0:
+            # Identity matrix for 0 power
+            return Matrix([[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)], self.line, self.column)
+
+        result = Matrix([row[:] for row in self.rows], self.line, self.column)
+        for _ in range(int(other) - 1):
+            result = result * self
+        return result
+
     def __add__(self, other):
         result = []
         if isinstance(other, Matrix):

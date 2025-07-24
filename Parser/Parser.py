@@ -293,11 +293,25 @@ class Parser:
 
     def parse_factor(self):
         """
-        Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+        Factor         = Power ( ( "/" | "*" ) Power )* ;
+        """
+        l_expression = self.parse_power()
+
+        while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.MULTIPLY):
+            token = self.consume()
+            op = to_operator_type[token.value]
+            r_expression = self.parse_power()
+            l_expression = BinaryOperator(l_expression, op, r_expression, token.line, token.column)
+        return l_expression
+        
+
+    def parse_power(self):
+        """
+        Power          = Unary ( "^" Unary )* ;
         """
         l_expression = self.parse_unary()
 
-        while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.MULTIPLY):
+        while self.check_type(TokenType.POWER):
             token = self.consume()
             op = to_operator_type[token.value]
             r_expression = self.parse_unary()

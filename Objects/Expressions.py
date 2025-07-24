@@ -5,7 +5,8 @@ Klasy obiektów reprezentujacych expression
     Equality       = Comparison ( "==" Comparison )* ;
     Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
     Term           = Factor ( ( "-" | "+" ) Factor )* ;
-    Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+    Factor         = Power ( ( "/" | "*" ) Power )* ;
+    Power          = Unary ( "^" Unary )* ;
     Unary          = ( "not" | "-" ) Unary | Primary ;
     Primary        = Literal | "(" Expression ")" ; 
     Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 

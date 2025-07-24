@@ -2,18 +2,19 @@ from enum import Enum, auto
 
 
 class OperatorType(Enum):
-    PLUS = auto()
-    MINUS = auto()
-    MULTIPLY = auto()
-    DIVIDE = auto()
-
-    EQUAL = auto()
-    NOT_EQUAL = auto()
-
     LESS_OR_EQUAL = auto()
     GREATER_OR_EQUAL = auto()
     GREATER = auto()
     LESS = auto()
+
+    EQUAL = auto()
+    NOT_EQUAL = auto()
+
+    MULTIPLY = auto()
+    DIVIDE = auto()
+    PLUS = auto()
+    MINUS = auto()
+    POWER = auto()
 
     AND = auto()
     OR = auto()
@@ -33,6 +34,7 @@ to_operator_type = {
     '/': OperatorType.DIVIDE,
     '+': OperatorType.PLUS,
     '-': OperatorType.MINUS,
+    '^': OperatorType.POWER,
 
     'and': OperatorType.AND,
     'or': OperatorType.OR,
