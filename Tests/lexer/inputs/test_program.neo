@@ -1,6 +1,0 @@
-# hello
-function fun(True, "string"){
-    var x = 4.5;
-    return x;
-}
--4;

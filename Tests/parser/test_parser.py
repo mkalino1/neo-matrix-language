@@ -5,12 +5,25 @@ from Objects.Instructions import Block, FunctionCall, IfStatement, Return
 from Objects.Expressions import *
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
-from Lexer.Source import SourceFile
+from Lexer.Source import SourceString
 from Objects.OperatorType import OperatorType
 
 
 def test_literals():
-    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/literals.neo")))
+    neo_code = '''
+    # Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
+
+    a = [1, 2 | 4, 5];
+    b = 5;
+    c = True;
+    d = "Hello";
+    e = myfun("argument");
+    f = obj.method;
+    g = matrix[3, 4];
+    h = matrix[2];
+    j = some_variable;
+    '''
+    parser = Parser(Lexer(SourceString(neo_code)))
     assignments = (x for x in parser.parse_program().toplevel_objects)
 
     assert isinstance(next(assignments).expression, Matrix)
@@ -25,7 +38,20 @@ def test_literals():
 
 
 def test_order_of_operations():
-    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/order.neo")))
+    neo_code = '''
+    a = (1 + 2) * 3;
+    a = 1 + (2 * 3);
+    a = 1 + 2 * 3;
+
+    a = 1 <= 2 == 3 >= 4;
+
+    a = 1 <= 2 == 3 >= 4 and 1 <= 2 == 3 >= 4;
+
+    a = 10 - some_variable;
+
+    a = not (10 == ten);
+    '''
+    parser = Parser(Lexer(SourceString(neo_code)))
     objects = (x for x in parser.parse_program().toplevel_objects)
 
     assert isinstance(next(objects).expression.lvalue, BinaryOperator)
@@ -48,7 +74,17 @@ def test_order_of_operations():
 
 
 def test_function():
-    parser = Parser(Lexer(SourceFile("./Tests/parser/inputs/function.neo")))
+    neo_code = '''
+    function example(raz, dwa){
+        if(3){
+            return matrix.det;
+        }
+        else {
+            add("nothing");
+        }
+    }
+    '''
+    parser = Parser(Lexer(SourceString(neo_code)))
     objects = (x for x in parser.parse_program().toplevel_objects)
     fun = next(objects)
     assert isinstance(fun, Function)

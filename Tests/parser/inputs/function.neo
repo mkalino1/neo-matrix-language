@@ -1,8 +1,0 @@
-function example(raz, dwa){
-    if(3){
-        return matrix.det;
-    }
-    else {
-        add("nothing");
-    }
-}

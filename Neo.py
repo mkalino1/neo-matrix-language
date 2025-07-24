@@ -21,6 +21,9 @@ resultMatrix = [
 ];
 
 print(resultMatrix);
+
+# Fibonacci matrix to the 10th power
+print([1, 1 | 1, 0] ^ 10);
 """
 
 source = SourceString(source_string)
