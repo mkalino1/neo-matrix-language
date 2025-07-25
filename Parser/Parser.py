@@ -201,17 +201,21 @@ class Parser:
 
     def try_parse_declaration(self):
         """
-        Declaration = 'var' Identifier '=' Expression ';'
+        Declaration = 'var' ['mut'] Identifier '=' Expression ';'
         """
         if not self.check_type(TokenType.VAR_DECLARATION):
             return None
         var_token = self.consume()
+        mutable = False
+        if self.check_type(TokenType.MUT):
+            self.consume()
+            mutable = True
         identifier_token = self.expect(TokenType.IDENTIFIER)
         identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
         self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
         self.expect(TokenType.SEMICOLON)
-        return Declaration(identifier, expression, var_token.line, var_token.column)
+        return Declaration(identifier, expression, mutable, var_token.line, var_token.column)
 
 
     def try_parse_functioncall_with_consumed_identifier(self, first_identifier):

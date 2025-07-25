@@ -51,7 +51,7 @@ def test_matrix_arithmetic_and_equality(capsys):
 
 def test_matrix_copy_and_assignment(capsys):
     program = '''
-    var m = zeros(2);
+    var mut m = zeros(2);
     var n = m.copy;
     m[0, 0] = 5;
     print(n);
@@ -159,4 +159,47 @@ def test_matrix_determinant_non_square_raises_error(capsys):
     print(m.det);
     '''
     run_neo_and_assert(program, "Error at line: 2, column: 13. Matrix must be square to calculate determinant", capsys)
+
+def test_matrix_immutable_assignment(capsys):
+    program = '''
+    var m = zeros(2);
+    m = zeros(3);
+    '''
+    run_neo_and_assert(program, "Error at line: 3, column: 5. Variable 'm' is immutable and cannot be assigned to", capsys)
+
+def test_matrix_mutable_assignment(capsys):
+    program = '''
+    var mut m = zeros(2);
+    m = zeros(3);
+    print(m);
+    '''
+    expected = '''
+    -------------
+    | 0   0   0 |
+    | 0   0   0 |
+    | 0   0   0 |
+    -------------
+    '''
+    run_neo_and_assert(program, expected, capsys)
+
+def test_matrix_immutable_element_assignment(capsys):
+    program = '''
+    var m = zeros(2);
+    m[0, 0] = 5;
+    '''
+    run_neo_and_assert(program, "Error at line: 3, column: 5. Matrix variable 'm' is immutable and cannot be modified", capsys)
+
+def test_matrix_mutable_element_assignment(capsys):
+    program = '''
+    var mut m = zeros(2);
+    m[0, 0] = 5;
+    print(m);
+    '''
+    expected = '''
+    -----------
+    | 5.0   0 |
+    |   0   0 |
+    -----------
+    '''
+    run_neo_and_assert(program, expected, capsys)
 

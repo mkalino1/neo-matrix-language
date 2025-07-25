@@ -50,7 +50,8 @@ class Visitor:
             raise NeoRuntimeError("Incorrect number of arguments", line, column)
 
         for param, arg in zip(function.parameter_list, function_call.arguments):
-            function.block.passed_variables[param.value] = arg.accept(self)
+            # Always store as (value, mutable=False) for parameters
+            function.block.passed_variables[param.value] = (arg.accept(self), False)
 
         return function.block.accept(self)
 
@@ -108,7 +109,14 @@ class Visitor:
             # Only allow assignment if variable already exists in any scope
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
-                    scope[assignment.identifier.value] = expression_value
+                    old_value, mutable = scope[assignment.identifier.value]
+                    if not mutable:
+                        raise NeoRuntimeError(
+                            f"Variable '{assignment.identifier.value}' is immutable and cannot be assigned to",
+                            assignment.line,
+                            assignment.column
+                        )
+                    scope[assignment.identifier.value] = (expression_value, mutable)
                     break
             else:
                 raise NeoRuntimeError(
@@ -124,9 +132,15 @@ class Visitor:
                 raise NeoRuntimeError("Indices must be whole numbers", assignment.line, assignment.column)
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
-                    matrix:Matrix = scope[assignment.identifier.value]
+                    matrix, mutable = scope[assignment.identifier.value]
                     if not isinstance(matrix, Matrix):
                         raise NeoRuntimeError("Only matrix can use access operation", assignment.line, assignment.column)
+                    if not mutable:
+                        raise NeoRuntimeError(
+                            f"Matrix variable '{assignment.identifier.value}' is immutable and cannot be modified",
+                            assignment.line,
+                            assignment.column
+                        )
                     matrix.rows[int(first_index_value)][int(second_index_value)] = expression_value
                     return
             raise NeoRuntimeError(f"Matrix {assignment.identifier.value} doesn't exist", assignment.line, assignment.column)     
@@ -137,13 +151,14 @@ class Visitor:
         if identifier in self.variables[-1]:
             raise NeoRuntimeError(f"Variable '{identifier}' already declared in this scope", declaration.line, declaration.column)
         value = declaration.expression.accept(self)
-        self.variables[-1][identifier] = value
+        self.variables[-1][identifier] = (value, declaration.mutable)
 
 
     def visit_identifier(self, identifier:Identifier):
         for scope in self.variables[::-1]:
             if identifier.value in scope:
-                return scope[identifier.value]
+                value, _ = scope[identifier.value]
+                return value
         
         raise NeoRuntimeError(f"Variable '{identifier.value}' doesn't exist", identifier.line, identifier.column) 
 

@@ -53,10 +53,10 @@ def test_if_truthy_and_falsy_values(capsys):
 
 def test_while_loop_matrix_fill(capsys):
     program = '''
-    var m = zeros(3, 4);
-    var i = 0;
+    var mut m = zeros(3, 4);
+    var mut i = 0;
     while(i < m.rowlen){
-        var j = 0;
+        var mut j = 0;
         while( j < m.collen){
             m[i, j] = i * j;
             j = j+1;
@@ -75,8 +75,9 @@ def test_while_loop_matrix_fill(capsys):
     run_neo_and_assert(program, expected, capsys)
 
 def test_var_declaration_and_assignment(capsys):
+    # Mutable variable: reassignment should work
     program = '''
-    var x = 5;
+    var mut x = 5;
     print(x);
     x = 10;
     print(x);
@@ -93,3 +94,10 @@ def test_var_redeclaration_error(capsys):
     var x = 2;
     '''
     run_neo_and_assert(program, "Error at line: 3, column: 5. Variable 'x' already declared in this scope", capsys)
+
+def test_var_reassignment_error(capsys):
+    program = '''
+    var x = 1;
+    x = 2;
+    '''
+    run_neo_and_assert(program, "Error at line: 3, column: 5. Variable 'x' is immutable and cannot be assigned to", capsys)

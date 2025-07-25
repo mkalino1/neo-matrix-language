@@ -50,7 +50,7 @@ def test_recursive_factorial(capsys):
 
 def test_function_scope_and_shadowing(capsys):
     program = '''
-    var a = 2;
+    var mut a = 2;
     var arg = 0;
     function scope(arg){
         print(a);
@@ -68,6 +68,16 @@ def test_function_scope_and_shadowing(capsys):
     0.0
     '''
     run_neo_and_assert(program, expected, capsys)
+
+def test_function_scope_reassignment_error(capsys):
+    program = '''
+    var a = 2;
+    function scope(){
+        a = 4;
+    }
+    scope();
+    '''
+    run_neo_and_assert(program, "Error at line: 4, column: 9. Variable 'a' is immutable and cannot be assigned to", capsys)
 
 def test_function_call_with_expression_args(capsys):
     program = '''

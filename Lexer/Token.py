@@ -5,6 +5,7 @@ class TokenType(Enum):
     EOF = auto()
     IDENTIFIER = auto()
     VAR_DECLARATION = auto()
+    MUT = auto()
 
     SCALAR = auto()
     BOOL = auto()
@@ -80,6 +81,7 @@ class Symbol:
         'or': TokenType.OR,
         'not': TokenType.NOT,
         'var': TokenType.VAR_DECLARATION,
+        'mut': TokenType.MUT,
         'True': TokenType.BOOL,
         'False': TokenType.BOOL,
         'return': TokenType.RETURN,
