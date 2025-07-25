@@ -50,8 +50,8 @@ def test_recursive_factorial(capsys):
 
 def test_function_scope_and_shadowing(capsys):
     program = '''
-    a = 2;
-    arg = 0;
+    var a = 2;
+    var arg = 0;
     function scope(arg){
         print(a);
         a = 4;

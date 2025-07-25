@@ -10,12 +10,12 @@ parser.add_argument("filename", help="Pass path to Neo program to interpret", ty
 args = parser.parse_args()
 
 source_string = """
-n = zeros(9);
-firstMatrix = [1, 2, 3 | 4, 5, 6];
-secondMatrix = [1, 2 | 3, 4 | 5, 6];
-multiplied = firstMatrix * secondMatrix;
+var n = zeros(9);
+var firstMatrix = [1, 2, 3 | 4, 5, 6];
+var secondMatrix = [1, 2 | 3, 4 | 5, 6];
+var multiplied = firstMatrix * secondMatrix;
 
-resultMatrix = [
+var resultMatrix = [
   "First matrix", "Second matrix", "Multiplied", "Transposed" |
   firstMatrix, secondMatrix, multiplied, multiplied.transposed
 ];

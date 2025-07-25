@@ -13,15 +13,15 @@ def test_literals():
     neo_code = '''
     # Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
 
-    a = [1, 2 | 4, 5];
-    b = 5;
-    c = True;
-    d = "Hello";
-    e = myfun("argument");
-    f = obj.method;
-    g = matrix[3, 4];
-    h = matrix[2];
-    j = some_variable;
+    var a = [1, 2 | 4, 5];
+    var b = 5;
+    var c = True;
+    var d = "Hello";
+    var e = myfun("argument");
+    var f = obj.method;
+    var g = matrix[3, 4];
+    var h = matrix[2];
+    var j = some_variable;
     '''
     parser = Parser(Lexer(SourceString(neo_code)))
     assignments = (x for x in parser.parse_program().toplevel_objects)
@@ -39,7 +39,7 @@ def test_literals():
 
 def test_order_of_operations():
     neo_code = '''
-    a = (1 + 2) * 3;
+    var a = (1 + 2) * 3;
     a = 1 + (2 * 3);
     a = 1 + 2 * 3;
 

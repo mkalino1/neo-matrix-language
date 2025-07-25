@@ -1,4 +1,4 @@
-from Objects.Instructions import Assignment, Block, FunctionCall, IfStatement, Return, WhileLoop
+from Objects.Instructions import Assignment, Block, FunctionCall, IfStatement, Return, WhileLoop, Declaration
 from Objects.ToplevelObjects import Function
 from Objects.Expressions import Access, BinaryOperator, Identifier, Matrix, Property, UnaryOperator
 from Objects.OperatorType import OperatorType
@@ -56,12 +56,11 @@ class Visitor:
 
 
     def visit_block(self, block:Block):
-        # creating a new scope
-        if block.is_function_body:
-            self.variables.append({})
+        # creating a new scope for the block
+        self.variables.append({})
 
-        # if block is a function body, update the current scope with the passed variables
-        self.variables[-1].update(block.passed_variables)
+        if block.passed_variables:
+            self.variables[-1].update(block.passed_variables)
 
         return_value = None
         for instruction in block.instructions:
@@ -71,8 +70,7 @@ class Visitor:
             else:
                 break
 
-        if block.is_function_body:
-            self.variables.pop()
+        self.variables.pop()
         return return_value
 
 
@@ -106,16 +104,24 @@ class Visitor:
     def visit_assignment(self, assignment:Assignment):
         expression_value = assignment.expression.accept(self)
 
-        # Variables can only be assigned in the current scope
         if not assignment.first_index:
-            self.variables[-1][assignment.identifier.value] = expression_value
-
+            # Only allow assignment if variable already exists in any scope
+            for scope in self.variables[::-1]:
+                if assignment.identifier.value in scope:
+                    scope[assignment.identifier.value] = expression_value
+                    break
+            else:
+                raise NeoRuntimeError(
+                    f"Variable '{assignment.identifier.value}' must be declared before assignment",
+                    assignment.line,
+                    assignment.column
+                )
         else:
             first_index_value = assignment.first_index.accept(self)
             second_index_value = assignment.second_index.accept(self)
 
             if not (first_index_value.is_integer() and second_index_value.is_integer()):
-                raise NeoRuntimeError("Indieces must be whole numbers", assignment.line, assignment.column)
+                raise NeoRuntimeError("Indices must be whole numbers", assignment.line, assignment.column)
             for scope in self.variables[::-1]:
                 if assignment.identifier.value in scope:
                     matrix:Matrix = scope[assignment.identifier.value]
@@ -124,6 +130,14 @@ class Visitor:
                     matrix.rows[int(first_index_value)][int(second_index_value)] = expression_value
                     return
             raise NeoRuntimeError(f"Matrix {assignment.identifier.value} doesn't exist", assignment.line, assignment.column)     
+
+
+    def visit_declaration(self, declaration:Declaration):
+        identifier = declaration.identifier.value
+        if identifier in self.variables[-1]:
+            raise NeoRuntimeError(f"Variable '{identifier}' already declared in this scope", declaration.line, declaration.column)
+        value = declaration.expression.accept(self)
+        self.variables[-1][identifier] = value
 
 
     def visit_identifier(self, identifier:Identifier):

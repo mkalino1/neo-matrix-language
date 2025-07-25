@@ -1,5 +1,4 @@
 import re
-import pytest
 from Interpreter.Interpreter import Interpreter
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
@@ -54,10 +53,10 @@ def test_if_truthy_and_falsy_values(capsys):
 
 def test_while_loop_matrix_fill(capsys):
     program = '''
-    m = zeros(3, 4);
-    i = 0;
+    var m = zeros(3, 4);
+    var i = 0;
     while(i < m.rowlen){
-        j = 0;
+        var j = 0;
         while( j < m.collen){
             m[i, j] = i * j;
             j = j+1;
@@ -73,4 +72,24 @@ def test_while_loop_matrix_fill(capsys):
     | 0.0   2.0   4.0   6.0 |
     -------------------------
     '''
-    run_neo_and_assert(program, expected, capsys) 
+    run_neo_and_assert(program, expected, capsys)
+
+def test_var_declaration_and_assignment(capsys):
+    program = '''
+    var x = 5;
+    print(x);
+    x = 10;
+    print(x);
+    '''
+    expected = '''
+    5.0
+    10.0
+    '''
+    run_neo_and_assert(program, expected, capsys)
+
+def test_var_redeclaration_error(capsys):
+    program = '''
+    var x = 1;
+    var x = 2;
+    '''
+    run_neo_and_assert(program, "Error at line: 3, column: 5. Variable 'x' already declared in this scope", capsys)

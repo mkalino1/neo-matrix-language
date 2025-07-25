@@ -113,7 +113,7 @@ class Parser:
 
 
     def try_parse_instruction(self):
-        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER]
+        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.VAR_DECLARATION]
         if any([self.check_type(t) for t in types_to_check]):
             return self.parse_instruction()
         return None
@@ -121,19 +121,20 @@ class Parser:
 
     def parse_instruction(self):
         """
-        Instruction = IfStatement | Loop | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
+        Instruction = IfStatement | Loop | Declaration | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
         """
         if (block_trial := self.try_parse_block()): return block_trial
         if (if_trial := self.try_parse_if()): return if_trial
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
+        if (declaration_trial := self.try_parse_declaration()): return declaration_trial
 
         # in that case, the instruction should start with an identifier
         identifier_token = self.expect(TokenType.IDENTIFIER)
         first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
 
         # if a function call is a standalone instruction, it must end with a semicolon
-        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): 
+        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)):
             self.expect(TokenType.SEMICOLON)
             return funcall_trial
         if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
@@ -144,7 +145,6 @@ class Parser:
             self.lexer.token.token_type,
             self.lexer.token.value
         )
-
 
     def try_parse_if(self):
         """
@@ -197,6 +197,21 @@ class Parser:
 
         self.expect(TokenType.SEMICOLON)
         return Return(expression, first_token.line, first_token.column)
+
+
+    def try_parse_declaration(self):
+        """
+        Declaration = 'var' Identifier '=' Expression ';'
+        """
+        if not self.check_type(TokenType.VAR_DECLARATION):
+            return None
+        var_token = self.consume()
+        identifier_token = self.expect(TokenType.IDENTIFIER)
+        identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
+        self.expect(TokenType.ASSIGN)
+        expression = self.parse_expression()
+        self.expect(TokenType.SEMICOLON)
+        return Declaration(identifier, expression, var_token.line, var_token.column)
 
 
     def try_parse_functioncall_with_consumed_identifier(self, first_identifier):

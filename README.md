@@ -8,11 +8,11 @@ The interpreter reads and executes Neo source files, allowing users to perform m
 Suppose you have a Neo source file called `example.neo`:
 
 ```neo
-firstMatrix = [1, 2, 3 | 4, 5, 6];
-secondMatrix = [1, 2 | 3, 4 | 5, 6];
-multiplied = firstMatrix * secondMatrix;
+var firstMatrix = [1, 2, 3 | 4, 5, 6];
+var secondMatrix = [1, 2 | 3, 4 | 5, 6];
+var multiplied = firstMatrix * secondMatrix;
 
-resultMatrix = [
+var resultMatrix = [
   "First matrix", "Second matrix", "Multiplied", "Transposed" |
   firstMatrix, secondMatrix, multiplied, multiplied.transposed
 ];
