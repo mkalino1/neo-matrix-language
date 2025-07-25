@@ -35,14 +35,14 @@ class Parser:
 
     def parse_program(self):
         """
-        Program = { FunctionDefinition | Instruction } ;
+        Program = { Instruction } ;
         """
-        toplevel_objects = []
-        while (object := self.try_parse_function()) or (object := self.try_parse_instruction()):
-            toplevel_objects.append(object)
+        toplevel_instructions = []
+        while instruction := self.try_parse_instruction():
+            toplevel_instructions.append(instruction)
 
         self.expect(TokenType.EOF)
-        return Program(toplevel_objects)
+        return Program(toplevel_instructions)
 
 
     def try_parse_function(self):
@@ -113,7 +113,7 @@ class Parser:
 
 
     def try_parse_instruction(self):
-        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.VAR_DECLARATION]
+        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.VAR_DECLARATION, TokenType.FUNCTION]
         if any([self.check_type(t) for t in types_to_check]):
             return self.parse_instruction()
         return None
@@ -121,12 +121,13 @@ class Parser:
 
     def parse_instruction(self):
         """
-        Instruction = IfStatement | Loop | Declaration | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
+        Instruction = IfStatement | Loop | FunctionDefinition | Declaration | Assignment | FunctionCall ";" | BlockInstruction | ReturnInstruction;
         """
         if (block_trial := self.try_parse_block()): return block_trial
         if (if_trial := self.try_parse_if()): return if_trial
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
+        if (function_trial := self.try_parse_function()): return function_trial
         if (declaration_trial := self.try_parse_declaration()): return declaration_trial
 
         # in that case, the instruction should start with an identifier
