@@ -22,29 +22,37 @@ class Interpreter():
 
 class Visitor:
     def __init__(self):
-        self.variables = [{}]
-        self.functions = {}
+        self.scopes = [{}]
 
 
     def visit_function(self, function:Function):
         if function.name.value in builtin_functions:
             raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
-        self.functions[function.name.value] = function
+        # Store function in the current scope as a special value
+        self.scopes[-1][function.name.value] = (function, False)  # (function object, mutable=False)
 
 
     def visit_function_call(self, function_call:FunctionCall):
         line = function_call.function_name.line
         column = function_call.function_name.column
+        function_name = function_call.function_name.value
 
-        if function_call.function_name.value in builtin_functions:
-            builtin_function = builtin_functions[function_call.function_name.value]
+        if function_name in builtin_functions:
+            builtin_function = builtin_functions[function_name]
             return builtin_function(line, column, *[arg.accept(self) for arg in function_call.arguments])
 
-        if not function_call.function_name.value in self.functions:
-            raise NeoRuntimeError(f"Function '{ function_call.function_name.value}' doesn't exist", line, column) 
-
-        function:Function = self.functions[function_call.function_name.value]
+        # Look for function in scopes
+        function = None
+        for scope in self.scopes[::-1]:
+            if function_name in scope:
+                value, _ = scope[function_name]
+                if isinstance(value, Function):
+                    function = value
+                    break
+        
+        if function is None:
+            raise NeoRuntimeError(f"Function '{function_name}' doesn't exist", line, column)
 
         if len(function.parameter_list) != len(function_call.arguments):
             raise NeoRuntimeError("Incorrect number of arguments", line, column)
@@ -58,10 +66,10 @@ class Visitor:
 
     def visit_block(self, block:Block):
         # creating a new scope for the block
-        self.variables.append({})
+        self.scopes.append({})
 
         if block.passed_variables:
-            self.variables[-1].update(block.passed_variables)
+            self.scopes[-1].update(block.passed_variables)
 
         return_value = None
         for instruction in block.instructions:
@@ -71,7 +79,7 @@ class Visitor:
             else:
                 break
 
-        self.variables.pop()
+        self.scopes.pop()
         return return_value
 
 
@@ -107,9 +115,15 @@ class Visitor:
 
         if not assignment.first_index:
             # Only allow assignment if variable already exists in any scope
-            for scope in self.variables[::-1]:
+            for scope in self.scopes[::-1]:
                 if assignment.identifier.value in scope:
                     old_value, mutable = scope[assignment.identifier.value]
+                    if isinstance(old_value, Function):
+                        raise NeoRuntimeError(
+                            f"Variable '{assignment.identifier.value}' is a function and cannot be assigned to",
+                            assignment.line,
+                            assignment.column
+                        )
                     if not mutable:
                         raise NeoRuntimeError(
                             f"Variable '{assignment.identifier.value}' is immutable and cannot be assigned to",
@@ -130,7 +144,7 @@ class Visitor:
 
             if not (first_index_value.is_integer() and second_index_value.is_integer()):
                 raise NeoRuntimeError("Indices must be whole numbers", assignment.line, assignment.column)
-            for scope in self.variables[::-1]:
+            for scope in self.scopes[::-1]:
                 if assignment.identifier.value in scope:
                     matrix, mutable = scope[assignment.identifier.value]
                     if not isinstance(matrix, Matrix):
@@ -148,14 +162,14 @@ class Visitor:
 
     def visit_declaration(self, declaration:Declaration):
         identifier = declaration.identifier.value
-        if identifier in self.variables[-1]:
+        if identifier in self.scopes[-1]:
             raise NeoRuntimeError(f"Variable '{identifier}' already declared in this scope", declaration.line, declaration.column)
         value = declaration.expression.accept(self)
-        self.variables[-1][identifier] = (value, declaration.mutable)
+        self.scopes[-1][identifier] = (value, declaration.mutable)
 
 
     def visit_identifier(self, identifier:Identifier):
-        for scope in self.variables[::-1]:
+        for scope in self.scopes[::-1]:
             if identifier.value in scope:
                 value, _ = scope[identifier.value]
                 return value

@@ -6,9 +6,10 @@ from Lexer.Source import SourceFile, SourceString
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("filename", help="Pass path to Neo program to interpret", type=str)
+parser.add_argument("filename", nargs="?", help="Pass path to Neo program to interpret (optional)", type=str)
 args = parser.parse_args()
 
+# Default source string if no filename provided
 source_string = """
 var n = zeros(9);
 var firstMatrix = [1, 2, 3 | 4, 5, 6];
@@ -26,8 +27,11 @@ print(resultMatrix);
 print([1, 1 | 1, 0] ^ 10);
 """
 
-source = SourceString(source_string)
-# source = SourceFile(args.filename)
+# Use SourceFile if filename provided, otherwise use SourceString
+if args.filename:
+    source = SourceFile(args.filename)
+else:
+    source = SourceString(source_string)
 lexer = Lexer(source)
 parser = Parser(lexer)
 
