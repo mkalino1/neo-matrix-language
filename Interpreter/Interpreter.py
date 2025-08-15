@@ -124,12 +124,6 @@ class Visitor:
             for scope in self.scopes[::-1]:
                 if assignment.identifier.value in scope:
                     old_value, mutable = scope[assignment.identifier.value]
-                    if isinstance(old_value, Function):
-                        raise NeoRuntimeError(
-                            f"Variable '{assignment.identifier.value}' is a function and cannot be assigned to",
-                            assignment.line,
-                            assignment.column
-                        )
                     if not mutable:
                         raise NeoRuntimeError(
                             f"Variable '{assignment.identifier.value}' is immutable and cannot be assigned to",
