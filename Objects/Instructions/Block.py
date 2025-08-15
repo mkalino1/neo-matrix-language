@@ -5,6 +5,7 @@ class Block(Node):
         super().__init__(line, column)
         self.instructions = instructions
         self.passed_variables = {}
+        self.closure = None
         self.is_function_body = is_function_body
 
     def __repr__(self):

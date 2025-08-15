@@ -11,4 +11,4 @@ class Function(Node):
         return f'{self.__class__.__name__}: {self.name} {self.parameter_list} {self.block}'
 
     def accept(self, visitor):
-        return visitor.visit_function(self) 
+        return visitor.visit_function_declaration(self) 

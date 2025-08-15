@@ -54,49 +54,38 @@ def test_function_as_argument(capsys):
     run_neo_and_assert(program, expected, capsys)
 
 def test_function_returning_function(capsys):
+    """Test functions that return other functions using closures"""
     program = '''
-    function add(x, y) {
-        return x + y;
-    }
-
-    function multiply(x, y) {
-        return x * y;
-    }
-
-    function subtract(x, y) {
-        return x - y;
-    }
-
-    # Function that returns a function - operation factory
-    function create_operation(operation_type) {
-        if (operation_type == "add") {
-            return add;
-        } else {
-            if (operation_type == "multiply") {
-                return multiply;
-            } else {
-                if (operation_type == "subtract") {
-                    return subtract;
-                } else {
-                    return add;  # Default
-                }
-            }
+    function create_adder(base) {
+        function add(value) {
+            return base + value;
         }
+        return add;
     }
-
-    var add_op = create_operation("add");
-    var mult_op = create_operation("multiply");
-    var sub_op = create_operation("subtract");
-
-    print("add_op(8, 2):", add_op(8, 2));
-    print("mult_op(8, 2):", mult_op(8, 2));
-    print("sub_op(8, 2):", sub_op(8, 2));
+    
+    function create_multiplier(factor) {
+        function multiply(value) {
+            return factor * value;
+        }
+        return multiply;
+    }
+    
+    var add_five = create_adder(5);
+    var multiply_by_three = create_multiplier(3);
+    
+    print("add_five(3):", add_five(3));
+    print("add_five(7):", add_five(7));
+    print("multiply_by_three(4):", multiply_by_three(4));
+    print("multiply_by_three(6):", multiply_by_three(6));
     '''
+    
     expected = '''
-    add_op(8, 2): 10.0
-    mult_op(8, 2): 16.0
-    sub_op(8, 2): 6.0
+    add_five(3): 8.0
+    add_five(7): 12.0
+    multiply_by_three(4): 12.0
+    multiply_by_three(6): 18.0
     '''
+    
     run_neo_and_assert(program, expected, capsys)
 
 def test_function_composition(capsys):

@@ -5,7 +5,6 @@ from Objects.OperatorType import OperatorType
 from Errors.InterpreterExceptions import NeoRuntimeError
 from .Built_ins import builtin_functions
 
-
 class Interpreter():
     def __init__(self, parsed_program):
         self.parsed_objects = parsed_program.toplevel_objects
@@ -25,12 +24,12 @@ class Visitor:
         self.scopes = [{}]
 
 
-    def visit_function(self, function:Function):
+    def visit_function_declaration(self, function:Function):
         if function.name.value in builtin_functions:
             raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
-        # Store function in the current scope as a special value
-        self.scopes[-1][function.name.value] = (function, False)  # (function object, mutable=False)
+        # Store function in the current scope as a value
+        self.scopes[-1][function.name.value] = (function, False)
 
 
     def visit_function_call(self, function_call:FunctionCall):
@@ -63,8 +62,10 @@ class Visitor:
 
         return function.block.accept(self)
 
-
     def visit_block(self, block:Block):
+        if block.closure:
+            self.scopes.append(block.closure)
+
         # creating a new scope for the block
         self.scopes.append({})
 
@@ -73,13 +74,18 @@ class Visitor:
 
         return_value = None
         for instruction in block.instructions:
-            if return_value is None:
-                if (return_value := instruction.accept(self)):
-                    break
-            else:
+            return_value = instruction.accept(self)
+            if isinstance(instruction, Return):
                 break
 
+        if isinstance(return_value, Function):
+            return_value.block.closure = self.scopes[-1]
+        
         self.scopes.pop()
+        # Clean up the closure scopes
+        if block.closure:
+            self.scopes.pop()
+
         return return_value
 
 
