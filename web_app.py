@@ -27,11 +27,11 @@ class CodeResponse(BaseModel):
     error: str | None = None
     traceback: str | None = None
 
-@app.get("/hello")
+@app.get("/api/hello")
 async def hello():
     return {"message": "Hello, World!"}
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/api/", response_class=HTMLResponse)
 async def index():
     """Serve the main page"""
     try:
@@ -40,7 +40,7 @@ async def index():
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Neo Matrix Language Interpreter</h1><p>Template not found</p>")
 
-@app.post("/execute", response_model=CodeResponse)
+@app.post("/api/execute", response_model=CodeResponse)
 async def execute_code(request: CodeRequest):
     """Execute Neo Matrix Language code and return results"""
     try:
