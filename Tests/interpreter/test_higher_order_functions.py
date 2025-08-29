@@ -1,5 +1,4 @@
 import re
-import pytest
 from Interpreter.Interpreter import Interpreter
 from Lexer.Lexer import Lexer
 from Parser.Parser import Parser
@@ -117,5 +116,51 @@ def test_function_composition(capsys):
     compose(add_one, double, 5): 11.0
     compose(square, add_one, 3): 16.0
     compose(double, square, 4): 32.0
+    '''
+    run_neo_and_assert(program, expected, capsys)
+
+def test_function_returning_global_function(capsys):
+    program = '''
+    function add(x, y) {
+        return x + y;
+    }
+
+    function multiply(x, y) {
+        return x * y;
+    }
+
+    function subtract(x, y) {
+        return x - y;
+    }
+
+    # Function that returns a function - operation factory
+    function create_operation(operation_type) {
+        if (operation_type == "add") {
+            return add;
+        } else {
+            if (operation_type == "multiply") {
+                return multiply;
+            } else {
+                if (operation_type == "subtract") {
+                    return subtract;
+                } else {
+                    return add;  # Default
+                }
+            }
+        }
+    }
+
+    var add_op = create_operation("add");
+    var mult_op = create_operation("multiply");
+    var sub_op = create_operation("subtract");
+
+    print("add_op(8, 2):", add_op(8, 2));
+    print("mult_op(8, 2):", mult_op(8, 2));
+    print("sub_op(8, 2):", sub_op(8, 2));
+    '''
+    expected = '''
+    add_op(8, 2): 10.0
+    mult_op(8, 2): 16.0
+    sub_op(8, 2): 6.0
     '''
     run_neo_and_assert(program, expected, capsys)
