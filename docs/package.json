@@ -1,0 +1,13 @@
+{
+  "name": "neolang",
+  "version": "1.0.0",
+  "description": "Neo Matrix Language - Documentation and Online Editor",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

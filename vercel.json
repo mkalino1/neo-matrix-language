@@ -2,11 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "web_app.py",
+      "src": "api/rest_api.py",
       "use": "@vercel/python"
     },
     {
-      "src": "package.json",
+      "src": "docs/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "docs/.vitepress/dist"
@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "web_app.py"
+      "dest": "api/rest_api.py"
     },
     {
       "src": "/(.*)",
