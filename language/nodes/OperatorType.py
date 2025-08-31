@@ -12,6 +12,7 @@ class OperatorType(Enum):
 
     MULTIPLY = auto()
     DIVIDE = auto()
+    DIVIDE_INTEGER = auto()
     PLUS = auto()
     MINUS = auto()
     POWER = auto()
@@ -32,6 +33,7 @@ to_operator_type = {
 
     '*': OperatorType.MULTIPLY,
     '/': OperatorType.DIVIDE,
+    '//': OperatorType.DIVIDE_INTEGER,
     '+': OperatorType.PLUS,
     '-': OperatorType.MINUS,
     '^': OperatorType.POWER,

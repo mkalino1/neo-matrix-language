@@ -237,24 +237,33 @@ class Visitor:
             return left + right
         elif binary.op == OperatorType.MINUS:
             if isinstance(left, str) or isinstance(right, str):
-                raise NeoRuntimeError(f"Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
             return left - right
         elif binary.op == OperatorType.MULTIPLY:
             if isinstance(left, str) or isinstance(right, str):
-                raise NeoRuntimeError(f"Strings cannot take part in multiply operation", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Strings cannot take part in multiply operation", binary.lvalue.line, binary.lvalue.column)
             return left * right
         elif binary.op == OperatorType.DIVIDE:
             if isinstance(left, Matrix) or isinstance(right, Matrix):
-                raise NeoRuntimeError(f"Matrixes cannot take part in divide operation", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Matrixes cannot take part in divide operation", binary.lvalue.line, binary.lvalue.column)
             if isinstance(left, str) or isinstance(right, str):
-                raise NeoRuntimeError(f"Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Strings cannot take part in substract operation", binary.lvalue.line, binary.lvalue.column)
             try:
                 return left / right
             except ZeroDivisionError:
-                raise NeoRuntimeError(f"Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
+        elif binary.op == OperatorType.DIVIDE_INTEGER:
+            if isinstance(left, Matrix) or isinstance(right, Matrix):
+                raise NeoRuntimeError("Matrixes cannot take part in integer divide operation", binary.lvalue.line, binary.lvalue.column)
+            if isinstance(left, str) or isinstance(right, str):
+                raise NeoRuntimeError("Strings cannot take part in integer divide operation", binary.lvalue.line, binary.lvalue.column)
+            try:
+                return left // right
+            except ZeroDivisionError:
+                raise NeoRuntimeError("Cannot divide by zero", binary.lvalue.line, binary.lvalue.column)
         elif binary.op == OperatorType.POWER:
             if isinstance(left, str) or isinstance(right, str):
-                raise NeoRuntimeError(f"Strings cannot take part in power operation", binary.lvalue.line, binary.lvalue.column)
+                raise NeoRuntimeError("Strings cannot take part in power operation", binary.lvalue.line, binary.lvalue.column)
             return left ** right
 
         # Different types handling is done through __eq__

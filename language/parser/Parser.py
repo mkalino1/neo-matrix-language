@@ -254,7 +254,7 @@ class Parser:
         Equality       = Comparison ( "==" Comparison )* ;
         Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
         Term           = Factor ( ( "-" | "+" ) Factor )* ;
-        Factor         = Unary ( ( "/" | "*" ) Unary )* ;
+        Factor         = Unary ( ( "/" | "//" | "*" ) Unary )* ;
         Unary          = ( "not" | "-" ) Unary | Primary ;
         Primary        = Literal | "(" Expression ")" ; 
         Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
@@ -313,11 +313,11 @@ class Parser:
 
     def parse_factor(self):
         """
-        Factor         = Power ( ( "/" | "*" ) Power )* ;
+        Factor         = Power ( ( "/" | "//" | "*" ) Power )* ;
         """
         l_expression = self.parse_power()
 
-        while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.MULTIPLY):
+        while self.check_type(TokenType.DIVIDE) or self.check_type(TokenType.DIVIDE_INTEGER) or self.check_type(TokenType.MULTIPLY):
             token = self.consume()
             op = to_operator_type[token.value]
             r_expression = self.parse_power()

@@ -3,7 +3,7 @@ outline: deep
 ---
 
 <script setup>
-import NeoEditor from './.vitepress/components/NeoEditor.vue'
+import NeoEditor from './components/NeoEditor.vue'
 </script>
 
 # Neo Matrix Language Editor
