@@ -67,25 +67,23 @@ class Lexer:
                 return True
         return False
 
+
     def try_build_scalar(self):
         if not self.source.current_char.isdigit():
             return False
 
         buffer = ''
 
-        if self.source.current_char == '0':         # obsluga liczb zaczynajacych sie od zera
+        # Number can start with only one zero
+        if self.source.current_char == '0':
             buffer += '0'
             self.source.move_to_next_char()
         else:
-            while self.source.current_char.isdigit():   # obsluga pozostalych liczb
+            while self.source.current_char.isdigit():
                 buffer += self.source.current_char
                 self.source.move_to_next_char()
 
-        self.check_dot(buffer)
-        return True
-
-
-    def check_dot(self, buffer):            # metoda pomocnicza obslugująca liczby z kropką
+        # Check if the number has a dot
         if self.source.current_char == '.':
             buffer += self.source.current_char
             self.source.move_to_next_char()
@@ -93,12 +91,10 @@ class Lexer:
                 buffer += self.source.current_char
                 self.source.move_to_next_char()
 
-        #     self.token = Token(TokenType.SCALAR, float(buffer))  # to jest poprawna liczba z kropką - po kropce moze nic nie byc
-        #     return                     
-        # else:
-        #     self.token = Token(TokenType.SCALAR, int(buffer))        # to jest poprawna liczba bez kropki
-        self.token = Token(TokenType.SCALAR, float(buffer))
-        return                         
+            self.token = Token(TokenType.SCALAR, float(buffer))             
+        else:
+            self.token = Token(TokenType.SCALAR, int(buffer))   
+        return True
 
 
     def try_build_special_character(self):
