@@ -112,7 +112,7 @@ class Matrix(Node):
                 for j in range(y_cols):
                     for k in range(y_rows):
                         result[i][j] += self.rows[i][k] * other.rows[k][j]
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             for row in self.rows:
                 new_row = []
                 for elem in row:
@@ -151,7 +151,7 @@ class Matrix(Node):
                 for elem1, elem2 in zip(row1, row2):
                     new_row.append(elem1 + elem2)
                 result.append(new_row)
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             for row in self.rows:
                 new_row = []
                 for elem in row:
@@ -174,7 +174,7 @@ class Matrix(Node):
                 for elem1, elem2 in zip(row1, row2):
                     new_row.append(elem1 - elem2)
                 result.append(new_row)
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             for row in self.rows:
                 new_row = []
                 for elem in row:
@@ -194,7 +194,7 @@ class Matrix(Node):
                 for elem1, elem2 in zip(row1, row2):
                     new_row.append(elem2 - elem1)
                 result.append(new_row)
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             for row in self.rows:
                 new_row = []
                 for elem in row:
