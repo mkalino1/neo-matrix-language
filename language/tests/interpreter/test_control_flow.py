@@ -44,10 +44,10 @@ def test_if_truthy_and_falsy_values(capsys):
     }
     '''
     expected = '''
-    2.0
-    4.0
-    6.0
-    7.0
+    2
+    4
+    6
+    7
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -66,11 +66,11 @@ def test_while_loop_matrix_fill(capsys):
     print(m);
     '''
     expected = '''
-    -------------------------
-    | 0.0   0.0   0.0   0.0 |
-    | 0.0   1.0   2.0   3.0 |
-    | 0.0   2.0   4.0   6.0 |
-    -------------------------
+    -----------------
+    | 0   0   0   0 |
+    | 0   1   2   3 |
+    | 0   2   4   6 |
+    -----------------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -83,8 +83,8 @@ def test_var_declaration_and_assignment(capsys):
     print(x);
     '''
     expected = '''
-    5.0
-    10.0
+    5
+    10
     '''
     run_neo_and_assert(program, expected, capsys)
 

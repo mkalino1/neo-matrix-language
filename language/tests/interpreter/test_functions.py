@@ -26,7 +26,7 @@ def test_recursive_fibonacci(capsys):
     print(fibonnaci(10));
     '''
     expected = '''
-    55.0
+    55
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -43,7 +43,7 @@ def test_recursive_factorial(capsys):
     print(factorial(5));
     '''
     expected = '''
-    120.0
+    120
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -61,10 +61,10 @@ def test_function_scope_and_shadowing(capsys):
     print(arg);
     '''
     expected = '''
-    2.0
-    4.0
-    8.0
-    0.0
+    2
+    4
+    8
+    0
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -88,6 +88,6 @@ def test_function_call_with_expression_args(capsys):
     '''
     expected = '''
     krakow
-    4.0
+    4
     '''
     run_neo_and_assert(program, expected, capsys) 

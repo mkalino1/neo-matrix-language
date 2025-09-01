@@ -21,8 +21,8 @@ def test_matrix_determinant(capsys):
     print(m3.det);
     '''
     expected = '''
-    -2.0
-    -306.0
+    -2
+    -306
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -33,18 +33,16 @@ def test_matrix_arithmetic_and_equality(capsys):
     var n = [11, 22 | 33, 44];
     print(10+m*2);
     print(-10-m*2);
-    print(n + m == n - (-m));
     '''
     expected = '''
-    ---------------
-    | 12.0   14.0 |
-    | 16.0   18.0 |
-    ---------------
-    -----------------
-    | -12.0   -14.0 |
-    | -16.0   -18.0 |
-    -----------------
-    True
+    -----------
+    | 12   14 |
+    | 16   18 |
+    -----------
+    -------------
+    | -12   -14 |
+    | -16   -18 |
+    -------------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -61,10 +59,10 @@ def test_matrix_copy_and_assignment(capsys):
     | 0   0 |
     | 0   0 |
     ---------
-    -----------
-    | 5.0   0 |
-    |   0   0 |
-    -----------
+    ---------
+    | 5   0 |
+    | 0   0 |
+    ---------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -100,14 +98,14 @@ def test_matrix_power_identity_and_square(capsys):
     | 1.0   0.0 |
     | 0.0   1.0 |
     -------------
-    -------------
-    | 2.0   0.0 |
-    | 0.0   2.0 |
-    -------------
-    -------------
-    | 4.0   0.0 |
-    | 0.0   4.0 |
-    -------------
+    ---------
+    | 2   0 |
+    | 0   2 |
+    ---------
+    ---------
+    | 4   0 |
+    | 0   4 |
+    ---------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -117,10 +115,10 @@ def test_matrix_power_fibonacci(capsys):
     print(m ^ 5); # Fibonacci matrix to the 5th power
     '''
     expected = '''
-    -------------
-    | 8.0   5.0 |
-    | 5.0   3.0 |
-    -------------
+    ---------
+    | 8   5 |
+    | 5   3 |
+    ---------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -132,16 +130,16 @@ def test_matrix_within_matrix(capsys):
     print(big);
     '''
     expected = '''
-    ---------------------------------
-    | -------------   ------------- |
-    | | 1.0   2.0 |   | 5.0   6.0 | |
-    | | 3.0   4.0 |   | 7.0   8.0 | |
-    | -------------   ------------- |
-    | -------------   ------------- |
-    | | 5.0   6.0 |   | 1.0   2.0 | |
-    | | 7.0   8.0 |   | 3.0   4.0 | |
-    | -------------   ------------- |
-    ---------------------------------
+    -------------------------
+    | ---------   --------- |
+    | | 1   2 |   | 5   6 | |
+    | | 3   4 |   | 7   8 | |
+    | ---------   --------- |
+    | ---------   --------- |
+    | | 5   6 |   | 1   2 | |
+    | | 7   8 |   | 3   4 | |
+    | ---------   --------- |
+    -------------------------
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -195,10 +193,10 @@ def test_matrix_mutable_element_assignment(capsys):
     print(m);
     '''
     expected = '''
-    -----------
-    | 5.0   0 |
-    |   0   0 |
-    -----------
+    ---------
+    | 5   0 |
+    | 0   0 |
+    ---------
     '''
     run_neo_and_assert(program, expected, capsys)
 

@@ -40,9 +40,9 @@ def test_basic_closure(capsys):
     '''
     
     expected = '''
-    First call: 11.0
-    Second call: 12.0
-    Third call: 13.0
+    First call: 11
+    Second call: 12
+    Third call: 13
     '''
     
     run_neo_and_assert(program, expected, capsys)

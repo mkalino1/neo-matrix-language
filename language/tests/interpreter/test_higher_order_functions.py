@@ -46,9 +46,9 @@ def test_function_as_argument(capsys):
     print("apply_operation(subtract, 10, 4):", apply_operation(subtract, 10, 4));
     '''
     expected = '''
-    apply_operation(add, 5, 3): 8.0
-    apply_operation(multiply, 4, 6): 24.0
-    apply_operation(subtract, 10, 4): 6.0
+    apply_operation(add, 5, 3): 8
+    apply_operation(multiply, 4, 6): 24
+    apply_operation(subtract, 10, 4): 6
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -79,10 +79,10 @@ def test_function_returning_function(capsys):
     '''
     
     expected = '''
-    add_five(3): 8.0
-    add_five(7): 12.0
-    multiply_by_three(4): 12.0
-    multiply_by_three(6): 18.0
+    add_five(3): 8
+    add_five(7): 12
+    multiply_by_three(4): 12
+    multiply_by_three(6): 18
     '''
     
     run_neo_and_assert(program, expected, capsys)
@@ -113,9 +113,9 @@ def test_function_composition(capsys):
     '''
     expected = '''
     Function composition:
-    compose(add_one, double, 5): 11.0
-    compose(square, add_one, 3): 16.0
-    compose(double, square, 4): 32.0
+    compose(add_one, double, 5): 11
+    compose(square, add_one, 3): 16
+    compose(double, square, 4): 32
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -159,8 +159,8 @@ def test_function_returning_global_function(capsys):
     print("sub_op(8, 2):", sub_op(8, 2));
     '''
     expected = '''
-    add_op(8, 2): 10.0
-    mult_op(8, 2): 16.0
-    sub_op(8, 2): 6.0
+    add_op(8, 2): 10
+    mult_op(8, 2): 16
+    sub_op(8, 2): 6
     '''
     run_neo_and_assert(program, expected, capsys)

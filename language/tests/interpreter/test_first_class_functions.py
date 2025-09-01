@@ -42,11 +42,11 @@ def test_function_assignment(capsys):
     print("my_my_add(5, 3):", my_my_add(5, 3));
     '''
     expected = '''
-    add(5, 3): 8.0
-    my_add(5, 3): 8.0
-    multiply(4, 6): 24.0
-    my_multiply(4, 6): 24.0
-    my_my_add(5, 3): 8.0
+    add(5, 3): 8
+    my_add(5, 3): 8
+    multiply(4, 6): 24
+    my_multiply(4, 6): 24
+    my_my_add(5, 3): 8
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -75,9 +75,9 @@ def test_function_reassignment(capsys):
     print("After reassignment - operation(10, 5):", operation(10, 5));
     '''
     expected = '''
-    operation(10, 5): 15.0
-    After reassignment - operation(10, 5): 50.0
-    After reassignment - operation(10, 5): 5.0
+    operation(10, 5): 15
+    After reassignment - operation(10, 5): 50
+    After reassignment - operation(10, 5): 5
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -119,9 +119,9 @@ def test_function_as_return_value(capsys):
     print("sub_func(8, 2):", sub_func(8, 2));
     '''
     expected = '''
-    add_func(8, 2): 10.0
-    mult_func(8, 2): 16.0
-    sub_func(8, 2): 6.0
+    add_func(8, 2): 10
+    mult_func(8, 2): 16
+    sub_func(8, 2): 6
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -135,7 +135,7 @@ def test_function_with_no_parameters(capsys):
     print("Constant function:", const_func());
     '''
     expected = '''
-    Constant function: 100.0
+    Constant function: 100
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -149,7 +149,7 @@ def test_function_with_multiple_parameters(capsys):
     print("Complex operation:", complex_func(2, 3, 4));
     '''
     expected = '''
-    Complex operation: 10.0
+    Complex operation: 10
     '''
     run_neo_and_assert(program, expected, capsys)
 
@@ -172,8 +172,8 @@ def test_function_comparison(capsys):
     expected = '''
     func_ref1 == func_ref2: True
     func_ref1 == func_ref3: True
-    func_ref1(): 42.0
-    func_ref2(): 42.0
-    func_ref3(): 42.0
+    func_ref1(): 42
+    func_ref2(): 42
+    func_ref3(): 42
     '''
     run_neo_and_assert(program, expected, capsys)
