@@ -16,28 +16,28 @@ def run_neo_and_assert(program, expected_output, capsys):
 def test_function_as_argument(capsys):
     program = '''
     # Basic arithmetic functions
-    function add(x, y) {
+    func add(x, y) {
         return x + y;
     }
 
-    function multiply(x, y) {
+    func multiply(x, y) {
         return x * y;
     }
 
-    function subtract(x, y) {
+    func subtract(x, y) {
         return x - y;
     }
 
-    function square(x) {
+    func square(x) {
         return x * x;
     }
 
-    function double(x) {
+    func double(x) {
         return x * 2;
     }
 
     # Function as argument - map-like behavior
-    function apply_operation(operation, x, y) {
+    func apply_operation(operation, x, y) {
         return operation(x, y);
     }
 
@@ -55,15 +55,15 @@ def test_function_as_argument(capsys):
 def test_function_returning_function(capsys):
     """Test functions that return other functions using closures"""
     program = '''
-    function create_adder(base) {
-        function add(value) {
+    func create_adder(base) {
+        func add(value) {
             return base + value;
         }
         return add;
     }
     
-    function create_multiplier(factor) {
-        function multiply(value) {
+    func create_multiplier(factor) {
+        func multiply(value) {
             return factor * value;
         }
         return multiply;
@@ -89,20 +89,20 @@ def test_function_returning_function(capsys):
 
 def test_function_composition(capsys):
     program = '''
-    function add_one(x) {
+    func add_one(x) {
         return x + 1;
     }
 
-    function double(x) {
+    func double(x) {
         return x * 2;
     }
 
-    function square(x) {
+    func square(x) {
         return x * x;
     }
 
     # Function composition
-    function compose(f, g, x) {
+    func compose(f, g, x) {
         return f(g(x));
     }
 
@@ -121,20 +121,20 @@ def test_function_composition(capsys):
 
 def test_function_returning_global_function(capsys):
     program = '''
-    function add(x, y) {
+    func add(x, y) {
         return x + y;
     }
 
-    function multiply(x, y) {
+    func multiply(x, y) {
         return x * y;
     }
 
-    function subtract(x, y) {
+    func subtract(x, y) {
         return x - y;
     }
 
     # Function that returns a function - operation factory
-    function create_operation(operation_type) {
+    func create_operation(operation_type) {
         if (operation_type == "add") {
             return add;
         } else {

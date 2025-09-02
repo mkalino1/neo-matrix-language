@@ -15,15 +15,15 @@ def run_neo_and_assert(program, expected_output, capsys):
 
 def test_function_assignment(capsys):
     program = '''
-    function add(x, y) {
+    func add(x, y) {
         return x + y;
     }
 
-    function multiply(x, y) {
+    func multiply(x, y) {
         return x * y;
     }
 
-    function subtract(x, y) {
+    func subtract(x, y) {
         return x - y;
     }
 
@@ -52,15 +52,15 @@ def test_function_assignment(capsys):
 
 def test_function_reassignment(capsys):
     program = '''
-    function add(x, y) {
+    func add(x, y) {
         return x + y;
     }
 
-    function multiply(x, y) {
+    func multiply(x, y) {
         return x * y;
     }
 
-    function subtract(x, y) {
+    func subtract(x, y) {
         return x - y;
     }
 
@@ -83,20 +83,20 @@ def test_function_reassignment(capsys):
 
 def test_function_as_return_value(capsys):
     program = '''
-    function add(x, y) {
+    func add(x, y) {
         return x + y;
     }
 
-    function multiply(x, y) {
+    func multiply(x, y) {
         return x * y;
     }
 
-    function subtract(x, y) {
+    func subtract(x, y) {
         return x - y;
     }
 
     # Function that returns a function
-    function get_operation(op_type) {
+    func get_operation(op_type) {
         if (op_type == "add") {
             return add;
         } else {
@@ -127,7 +127,7 @@ def test_function_as_return_value(capsys):
 
 def test_function_with_no_parameters(capsys):
     program = '''
-    function constant() {
+    func constant() {
         return 100;
     }
 
@@ -141,7 +141,7 @@ def test_function_with_no_parameters(capsys):
 
 def test_function_with_multiple_parameters(capsys):
     program = '''
-    function complex_op(a, b, c) {
+    func complex_op(a, b, c) {
         return a * b + c;
     }
 
@@ -155,7 +155,7 @@ def test_function_with_multiple_parameters(capsys):
 
 def test_function_comparison(capsys):
     program = '''
-    function test_func() {
+    func test_func() {
         return 42;
     }
 

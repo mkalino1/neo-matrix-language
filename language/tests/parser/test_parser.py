@@ -73,7 +73,7 @@ def test_order_of_operations():
 
 def test_function():
     neo_code = '''
-    function example(raz, dwa){
+    func example(raz, dwa){
         if(3){
             return matrix.det;
         }

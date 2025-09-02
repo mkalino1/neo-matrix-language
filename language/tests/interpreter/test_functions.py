@@ -15,7 +15,7 @@ def run_neo_and_assert(program, expected_output, capsys):
 
 def test_recursive_fibonacci(capsys):
     program = '''
-    function fibonnaci(n){
+    func fibonnaci(n){
        if (n <= 1){
             return n;
        }
@@ -32,7 +32,7 @@ def test_recursive_fibonacci(capsys):
 
 def test_recursive_factorial(capsys):
     program = '''
-    function factorial(n){
+    func factorial(n){
        if (n == 1){
             return n;
        }
@@ -51,7 +51,7 @@ def test_function_scope_and_shadowing(capsys):
     program = '''
     var mut a = 2;
     var arg = 0;
-    function scope(arg){
+    func scope(arg){
         print(a);
         a = 4;
         print(a);
@@ -71,7 +71,7 @@ def test_function_scope_and_shadowing(capsys):
 def test_function_scope_reassignment_error(capsys):
     program = '''
     var a = 2;
-    function scope(){
+    func scope(){
         a = 4;
     }
     scope();
@@ -80,7 +80,7 @@ def test_function_scope_reassignment_error(capsys):
 
 def test_function_call_with_expression_args(capsys):
     program = '''
-    function test(arg1, arg2){
+    func test(arg1, arg2){
         print(arg1);
         print(arg2);
     }

@@ -22,10 +22,10 @@ def run_neo_and_assert(program, expected_output, capsys):
 def test_basic_closure(capsys):
     """Test basic closure functionality - inner function can access outer function variables"""
     program = '''
-    function outer_function(x) {
+    func outer_function(x) {
         var mut counter = 0;
         
-        function inner_function() {
+        func inner_function() {
             counter = counter + 1;
             return x + counter;
         }

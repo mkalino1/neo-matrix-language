@@ -11,20 +11,15 @@ args = parser.parse_args()
 
 # Default source string if no filename provided
 source_string = """
-var n = zeros(9);
-var firstMatrix = [1, 2, 3 | 4, 5, 6];
-var secondMatrix = [1, 2 | 3, 4 | 5, 6];
-var multiplied = firstMatrix * secondMatrix;
-
-var resultMatrix = [
-  "First matrix", "Second matrix", "Multiplied", "Transposed" |
-  firstMatrix, secondMatrix, multiplied, multiplied.transposed
-];
-
-print(resultMatrix);
-
-# Fibonacci matrix to the 10th power
-print([1, 1 | 1, 0] ^ 10);
+func create_adder(base) {
+    func add(value) {
+        return base + value;
+    }
+    return add;
+}
+var adder = create_adder(10);
+print(adder(5));
+print(adder(7));
 """
 
 # Use SourceFile if filename provided, otherwise use SourceString

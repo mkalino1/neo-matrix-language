@@ -51,7 +51,7 @@ def test_lexer_token_types():
 def test_lexer_program():
     neo_code = '''
     # hello
-    function fun(True, "string"){
+    func fun(True, "string"){
         var x = 4.5;
         return x;
     }

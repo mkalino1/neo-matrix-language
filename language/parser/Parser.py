@@ -47,7 +47,7 @@ class Parser:
 
     def try_parse_function(self):
         """
-        FunctionDefinition = 'function' Identifier? '(' [Parameters] ')' BlockInstruction ;
+        FunctionDefinition = 'func' Identifier? '(' [Parameters] ')' BlockInstruction ;
         """
         if not self.check_type(TokenType.FUNCTION):
             return None

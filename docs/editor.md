@@ -22,7 +22,7 @@ Here are some examples you can try in the editor:
 
 ### Basic Function
 ```neo
-function greet(name) {
+func greet(name) {
     print("Hello, " + name + "!");
 }
 

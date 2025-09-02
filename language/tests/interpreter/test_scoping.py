@@ -19,12 +19,12 @@ def test_basic_scoping(capsys):
     # Global scope
     var global_var = 10;
 
-    function global_func() {
+    func global_func() {
         return global_var;
     }
 
     # Test basic scoping
-    function test_basic_scoping() {
+    func test_basic_scoping() {
         var local_var = 20;
 
         print("Global var:", global_var);
@@ -46,10 +46,10 @@ def test_nested_scoping(capsys):
     program = '''
     var global_var = 10;
 
-    function test_nested_scoping() {
+    func test_nested_scoping() {
         var outer_var = 30;
 
-        function inner_function() {
+        func inner_function() {
             var inner_var = 40;
             print("Inner function - outer_var:", outer_var);
             print("Inner function - inner_var:", inner_var);
@@ -75,7 +75,7 @@ def test_shadowing(capsys):
     program = '''
     var shadow_var = 50;
     
-    function test_shadowing() {
+    func test_shadowing() {
         var shadow_var = 60;
         print("Inside function:", shadow_var);
     }
@@ -112,12 +112,12 @@ def test_block_scoping(capsys):
 def test_scope_isolation(capsys):
     """Test that variables are isolated between different functions"""
     program = '''
-    function func1() {
+    func func1() {
         var isolated_var = 70;
         print("func1:", isolated_var);
     }
 
-    function func2() {
+    func func2() {
         var isolated_var = 80;
         print("func2:", isolated_var);
     }
@@ -136,13 +136,13 @@ def test_global_access_from_nested_scopes(capsys):
     program = '''
     var global_var = 42;
     
-    function global_func() {
+    func global_func() {
         return global_var * 2;
     }
 
-    function test_global_access() {
-        function deeply_nested() {
-            function even_deeper() {
+    func test_global_access() {
+        func deeply_nested() {
+            func even_deeper() {
                 print("Deeply nested:", global_var);
                 print("Deeply nested:", global_func());
             }
@@ -164,7 +164,7 @@ def test_mutable_variable_scoping(capsys):
     program = '''
     var mut global_mut = 1;
     
-    function test_mutable_scoping() {
+    func test_mutable_scoping() {
         var mut local_mut = 10;
         print("Before modification - global_mut:", global_mut);
         print("Before modification - local_mut:", local_mut);
@@ -191,15 +191,15 @@ def test_mutable_variable_scoping(capsys):
 def test_function_declaration_scoping(capsys):
     """Test that function declarations respect scoping rules"""
     program = '''
-    function outer_func() {
-        function inner_func() {
+    func outer_func() {
+        func inner_func() {
             return "inner";
         }
         return inner_func();
     }
 
-    function test_func_scoping() {
-        function inner_func() {
+    func test_func_scoping() {
+        func inner_func() {
             return "shadowed";
         }
         print("Local inner_func result:", inner_func());

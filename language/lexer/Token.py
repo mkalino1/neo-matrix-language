@@ -87,7 +87,7 @@ class Symbol:
         'True': TokenType.BOOL,
         'False': TokenType.BOOL,
         'return': TokenType.RETURN,
-        'function': TokenType.FUNCTION,
+        'func': TokenType.FUNCTION,
         'if': TokenType.IF,
         'else': TokenType.ELSE,
         'while': TokenType.WHILE

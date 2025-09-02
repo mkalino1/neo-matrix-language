@@ -16,7 +16,7 @@
       <div class="output-section">
         <div class="section-title">Output</div>
         <div class="output-area" id="outputArea">
-          {{ output || '// Output will appear here after running your code' }}
+          {{ output || '# Output will appear here after running your code' }}
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@ onMounted(async () => {
   editor.setValue(`# Welcome to Neo Matrix Language!
 # Try running this example:
 
-function greet(name) {
+func greet(name) {
     print("Hello, " + name + "!");
 }
 
@@ -109,13 +109,13 @@ async function runCode() {
   const code = editor.getValue();
   
   if (!code.trim()) {
-    output.value = "// Please enter some code to execute";
+    output.value = "# Please enter some code to execute";
     return;
   }
 
   // Show loading state
   isRunning.value = true;
-  output.value = "// Executing code...";
+  output.value = "# Executing code...";
 
   try {
     const response = await fetch('/api/execute', {
@@ -134,17 +134,17 @@ async function runCode() {
         result += data.output;
       }
       if (data.result && data.result !== "None") {
-        result += "\n// Return value: " + data.result;
+        result += "\n# Return value: " + data.result;
       }
-      output.value = result || "// Code executed successfully (no output)";
+      output.value = result || "# Code executed successfully (no output)";
     } else {
-      output.value = "// Error: " + data.error;
+      output.value = "# Error: " + data.error;
       if (data.traceback) {
-        output.value += "\n\n// Traceback:\n" + data.traceback;
+        output.value += "\n\n# Traceback:\n" + data.traceback;
       }
     }
   } catch (error) {
-    output.value = "// Network error: " + error.message;
+    output.value = "# Network error: " + error.message;
   } finally {
     // Hide loading state
     isRunning.value = false;
