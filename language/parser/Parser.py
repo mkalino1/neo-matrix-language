@@ -47,14 +47,16 @@ class Parser:
 
     def try_parse_function(self):
         """
-        FunctionDefinition = ‘function’ Identifier ‘(‘ [Parameters] ‘)’ BlockInstruction ;
+        FunctionDefinition = 'function' Identifier? '(' [Parameters] ')' BlockInstruction ;
         """
         if not self.check_type(TokenType.FUNCTION):
             return None
         first_token = self.consume()
 
-        identifier_token = self.expect(TokenType.IDENTIFIER)
-        function_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
+        function_identifier = None
+        if self.check_type(TokenType.IDENTIFIER):
+            identifier_token = self.consume()
+            function_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
 
         self.expect(TokenType.OP_ROUND_BRACKET)
         parameter_list = self.parse_parameters()
@@ -149,7 +151,7 @@ class Parser:
 
     def try_parse_if(self):
         """
-        IfStatement = ‘if’ ‘(‘ Expression ‘)’ BlockInstruction [‘else’ BlockInstruction] ;
+        IfStatement = 'if' '(' Expression ')' BlockInstruction ['else' BlockInstruction] ;
         """
         if not self.check_type(TokenType.IF):
             return None
@@ -170,7 +172,7 @@ class Parser:
 
     def try_parse_while(self):
         """
-        Loop = ‘while’ ‘(‘ Expression ‘)’ BlockInstruction ;
+        Loop = 'while' '(' Expression ')' BlockInstruction ;
         """
         if not self.check_type(TokenType.WHILE):
             return None
@@ -186,7 +188,7 @@ class Parser:
 
     def try_parse_return(self):
         """
-        ReturnInstruction = ‘return’ [ Expression ] ‘;’ ;
+        ReturnInstruction = 'return' [ Expression ] ';' ;
         """
         if not self.check_type(TokenType.RETURN):
             return None
@@ -221,7 +223,7 @@ class Parser:
 
     def try_parse_functioncall_with_consumed_identifier(self, first_identifier):
         """
-        FunctionCall = Identifier ‘(‘ [Arguments] ‘)’ ‘;’ ;
+        FunctionCall = Identifier '(' [Arguments] ')' ';' ;
         """
         if not self.check_type(TokenType.OP_ROUND_BRACKET):
             return None
@@ -233,7 +235,7 @@ class Parser:
 
     def try_parse_assignment_with_consumed_identifier(self, identifier):
         """
-        Assignment = (Access | Identifier) ‘=’ Expression ‘;’ ;
+        Assignment = (Access | Identifier) '=' Expression ';' ;
         """
         if not (self.check_type(TokenType.ASSIGN) or self.check_type(TokenType.OP_SQUARE_BRACKET)):
             return None
@@ -257,7 +259,7 @@ class Parser:
         Factor         = Unary ( ( "/" | "//" | "*" ) Unary )* ;
         Unary          = ( "not" | "-" ) Unary | Primary ;
         Primary        = Literal | "(" Expression ")" ; 
-        Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
+        Literal        = Bool | String | Scalar | Matrix | Function | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
         """
         l_expression = self.parse_equality()
 
@@ -368,7 +370,7 @@ class Parser:
 
     def try_parse_literal(self):
         """
-        Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
+        Literal = Bool | String | Scalar | Matrix | Function | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
         """
         if self.check_type(TokenType.BOOL): 
             token = self.consume()
@@ -380,6 +382,7 @@ class Parser:
             token = self.consume()
             return Scalar(token.value, token.line, token.column)
         if (matrix_trial := self.try_parse_matrix()): return matrix_trial
+        if (function_trial := self.try_parse_function()): return function_trial
         if self.check_type(TokenType.IDENTIFIER):
             token = self.consume()
             identifier = Identifier(token.value, token.line, token.column)
@@ -392,7 +395,7 @@ class Parser:
 
     def try_parse_grouping(self):
         """
-        Grouping = ‘(’ Expression ‘)’
+        Grouping = '(' Expression ')'
         """
         if not self.check_type(TokenType.OP_ROUND_BRACKET):
             return None
@@ -404,7 +407,7 @@ class Parser:
 
     def try_parse_matrix(self):
         """
-        Matrix = ‘[‘ MatrixRow {'|' MatrixRow} ‘]’ ;
+        Matrix = '[' MatrixRow {'|' MatrixRow} ']' ;
         """
         if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None
@@ -442,7 +445,7 @@ class Parser:
 
     def try_parse_property_with_consumed_identifier(self, first_identifier:Identifier):
         """
-        Property = Identifier ‘.’ Identifier ‘;’ ;
+        Property = Identifier '.' Identifier ';' ;
         """
         if not self.check_type(TokenType.DOT):
             return None
@@ -453,7 +456,7 @@ class Parser:
 
     def try_parse_access_with_consumed_identifier(self, identifier):
         """
-        MatrixAccess = Identifier ‘[‘ Scalar ‘,’ Scalar ‘]’ | Identifier ‘[‘ Scalar ‘]’
+        MatrixAccess = Identifier '[' Scalar ',' Scalar ']' | Identifier '[' Scalar ']'
         """
         if not self.check_type(TokenType.OP_SQUARE_BRACKET):
             return None

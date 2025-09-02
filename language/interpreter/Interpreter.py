@@ -25,11 +25,14 @@ class Visitor:
 
 
     def visit_function_declaration(self, function:Function):
-        if function.name.value in builtin_functions:
+        if function.name and function.name.value in builtin_functions:
             raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
         # Store function in the current scope as a value
-        self.scopes[-1][function.name.value] = (function, False)
+        if function.name and function.name.value:
+            self.scopes[-1][function.name.value] = (function, False)
+        
+        return function
 
 
     def visit_function_call(self, function_call:FunctionCall):
