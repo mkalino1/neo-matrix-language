@@ -12,4 +12,4 @@ class Function(Node):
         return f'{self.__class__.__name__}: {self.name.value if self.name else "anonymous"} {self.parameter_list} {self.block}'
 
     def accept(self, visitor):
-        return visitor.visit_function_declaration(self) 
+        return visitor.visit_function_definition(self) 
