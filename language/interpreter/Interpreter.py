@@ -24,7 +24,7 @@ class Visitor:
         self.scopes = [{}]
 
 
-    def visit_function_declaration(self, function:Function):
+    def visit_function_definition(self, function:Function):
         if function.name and function.name.value in builtin_functions:
             raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
@@ -36,25 +36,33 @@ class Visitor:
 
 
     def visit_function_call(self, function_call:FunctionCall):
-        line = function_call.function_name.line
-        column = function_call.function_name.column
-        function_name = function_call.function_name.value
+        line = function_call.function_name_or_body.line
+        column = function_call.function_name_or_body.column
 
-        if function_name in builtin_functions:
-            builtin_function = builtin_functions[function_name]
-            return builtin_function(line, column, *[arg.accept(self) for arg in function_call.arguments])
+        # Handle both identifier-based function calls and immediately invoked function expression (IIFE)
+        if isinstance(function_call.function_name_or_body, Function):
+            # Immediately invoked function expression (IIFE)
+            function = function_call.function_name_or_body
+        else:
+            # Traditional function call by name
+            function_name = function_call.function_name_or_body.value
 
-        # Look for function in scopes
-        function = None
-        for scope in self.scopes[::-1]:
-            if function_name in scope:
-                value, _ = scope[function_name]
-                if isinstance(value, Function):
-                    function = value
-                    break
-        
-        if function is None:
-            raise NeoRuntimeError(f"Function '{function_name}' doesn't exist", line, column)
+            # Look for function name in builtin functions
+            if function_name in builtin_functions:
+                builtin_function = builtin_functions[function_name]
+                return builtin_function(line, column, *[arg.accept(self) for arg in function_call.arguments])
+
+            # Look for function name in scopes
+            function = None
+            for scope in self.scopes[::-1]:
+                if function_name in scope:
+                    value, _ = scope[function_name]
+                    if isinstance(value, Function):
+                        function = value
+                        break
+            
+            if function is None:
+                raise NeoRuntimeError(f"Function '{function_name}' doesn't exist", line, column)
 
         if len(function.parameter_list) != len(function_call.arguments):
             raise NeoRuntimeError("Incorrect number of arguments", line, column)

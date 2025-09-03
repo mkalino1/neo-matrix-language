@@ -45,9 +45,9 @@ class Parser:
         return Program(toplevel_instructions)
 
 
-    def try_parse_function(self):
+    def try_parse_function_definition_or_iife(self):
         """
-        FunctionDefinition = 'func' Identifier? '(' [Parameters] ')' BlockInstruction ;
+        FunctionDefinition = 'func' Identifier? '(' [Parameters] ')' BlockInstruction ('(' [Arguments] ')')?;
         """
         if not self.check_type(TokenType.FUNCTION):
             return None
@@ -63,7 +63,17 @@ class Parser:
         self.expect(TokenType.CL_ROUND_BRACKET)
 
         function_block = self.parse_block(is_function_body=True)
-        return Function(function_identifier, parameter_list, function_block, first_token.line, first_token.column)
+        function = Function(function_identifier, parameter_list, function_block, first_token.line, first_token.column)
+        
+        # Check if this function is immediately followed by function call syntax (IIFE)
+        if self.check_type(TokenType.OP_ROUND_BRACKET):
+            # Parse the arguments and create a FunctionCall with the function as the expression
+            self.consume()
+            arguments = self.parse_arguments()
+            self.expect(TokenType.CL_ROUND_BRACKET)
+            return FunctionCall(function, arguments, function.line, function.column)
+        
+        return function
 
 
     def parse_parameters(self):
@@ -129,7 +139,7 @@ class Parser:
         if (if_trial := self.try_parse_if()): return if_trial
         if (while_trial := self.try_parse_while()): return while_trial
         if (return_trial := self.try_parse_return()): return return_trial
-        if (function_trial := self.try_parse_function()): return function_trial
+        if (function_trial := self.try_parse_function_definition_or_iife()): return function_trial
         if (declaration_trial := self.try_parse_declaration()): return declaration_trial
 
         # in that case, the instruction should start with an identifier
@@ -382,11 +392,11 @@ class Parser:
             token = self.consume()
             return Scalar(token.value, token.line, token.column)
         if (matrix_trial := self.try_parse_matrix()): return matrix_trial
-        if (function_trial := self.try_parse_function()): return function_trial
+        if (function_trial := self.try_parse_function_definition_or_iife()): return function_trial
         if self.check_type(TokenType.IDENTIFIER):
             token = self.consume()
             identifier = Identifier(token.value, token.line, token.column)
-            if (property_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return property_trial
+            if (functioncall_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return functioncall_trial
             if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
             if (access_trial := self.try_parse_access_with_consumed_identifier(identifier)): return access_trial
             return identifier

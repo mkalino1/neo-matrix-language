@@ -9,7 +9,7 @@ Klasy obiektów reprezentujacych expression
     Power          = Unary ( "^" Unary )* ;
     Unary          = ( "not" | "-" ) Unary | Primary ;
     Primary        = Literal | "(" Expression ")" ; 
-    Literal        = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
+    Literal        = Bool | String | Scalar | Matrix | Function | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
 
 """
 
