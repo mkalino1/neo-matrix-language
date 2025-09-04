@@ -46,3 +46,39 @@ def test_basic_closure(capsys):
     '''
     
     run_neo_and_assert(program, expected, capsys)
+
+def test_closure_multiple_instances(capsys):
+    """Test factory function creating multiple independent closure instances"""
+    program = '''
+    func create_counter(initial_value) {
+        var mut count = initial_value;
+        
+        func counter() {
+            count = count + 1;
+            return count;
+        }
+        
+        return counter;
+    }
+    
+    var counter1 = create_counter(0);
+    var counter2 = create_counter(100);
+    
+    print("Counter1 first:", counter1());
+    print("Counter2 first:", counter2());
+    print("Counter1 second:", counter1());
+    print("Counter2 second:", counter2());
+    print("Counter1 third:", counter1());
+    print("Counter2 third:", counter2());
+    '''
+    
+    expected = '''
+    Counter1 first: 1
+    Counter2 first: 101
+    Counter1 second: 2
+    Counter2 second: 102
+    Counter1 third: 3
+    Counter2 third: 103
+    '''
+    
+    run_neo_and_assert(program, expected, capsys)   

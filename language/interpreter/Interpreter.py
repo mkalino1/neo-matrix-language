@@ -4,6 +4,7 @@ from language.nodes.Expressions import Access, BinaryOperator, Identifier, Matri
 from language.nodes.OperatorType import OperatorType
 from language.errors.InterpreterExceptions import NeoRuntimeError
 from language.interpreter.Built_ins import builtin_functions
+import copy
 
 class Interpreter():
     def __init__(self, parsed_program):
@@ -71,7 +72,11 @@ class Visitor:
             # Always store as (value, mutable=False) for parameters
             function.block.passed_variables[param.value] = (arg.accept(self), False)
 
-        return function.block.accept(self)
+        return_value = function.block.accept(self)
+        if isinstance(return_value, Function):
+            # Deepcopy the function to avoid sharing the same closure
+            return copy.deepcopy(return_value)
+        return return_value
 
     def visit_block(self, block:Block):
         if block.closure:
