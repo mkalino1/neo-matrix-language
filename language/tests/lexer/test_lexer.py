@@ -52,17 +52,17 @@ def test_lexer_program():
     neo_code = '''
     # hello
     func fun(True, "string"){
-        var x = 4.5;
-        return x;
+        var x = 4.5
+        return x
     }
-    -4;
+    -4
     '''
     expected_types = [
         TokenType.FUNCTION, TokenType.IDENTIFIER, TokenType.OP_ROUND_BRACKET, TokenType.BOOL, TokenType.COMMA,
         TokenType.STRING, TokenType.CL_ROUND_BRACKET, TokenType.OP_CURLY_BRACKET, TokenType.VAR_DECLARATION,
-        TokenType.IDENTIFIER, TokenType.ASSIGN, TokenType.SCALAR, TokenType.SEMICOLON, TokenType.RETURN,
-        TokenType.IDENTIFIER, TokenType.SEMICOLON, TokenType.CL_CURLY_BRACKET, TokenType.MINUS, TokenType.SCALAR,
-        TokenType.SEMICOLON, TokenType.EOF
+        TokenType.IDENTIFIER, TokenType.ASSIGN, TokenType.SCALAR, TokenType.RETURN,
+        TokenType.IDENTIFIER, TokenType.CL_CURLY_BRACKET, TokenType.MINUS, TokenType.SCALAR,
+        TokenType.EOF
     ]
     lexer = Lexer(SourceString(neo_code))
     tokens = list(lexer.yield_tokens())

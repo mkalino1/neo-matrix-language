@@ -23,20 +23,20 @@ def test_basic_closure(capsys):
     """Test basic closure functionality - inner function can access outer function variables"""
     program = '''
     func outer_function(x) {
-        var mut counter = 0;
+        var mut counter = 0
         
         func inner_function() {
-            counter = counter + 1;
-            return x + counter;
+            counter = counter + 1
+            return x + counter
         }
         
-        return inner_function;
+        return inner_function
     }
     
-    var get_next = outer_function(10);
-    print("First call:", get_next());
-    print("Second call:", get_next());
-    print("Third call:", get_next());
+    var get_next = outer_function(10)
+    print("First call:", get_next())
+    print("Second call:", get_next())
+    print("Third call:", get_next())
     '''
     
     expected = '''
@@ -51,25 +51,25 @@ def test_closure_multiple_instances(capsys):
     """Test factory function creating multiple independent closure instances"""
     program = '''
     func create_counter(initial_value) {
-        var mut count = initial_value;
+        var mut count = initial_value
         
         func counter() {
-            count = count + 1;
-            return count;
+            count = count + 1
+            return count
         }
         
-        return counter;
+        return counter
     }
     
-    var counter1 = create_counter(0);
-    var counter2 = create_counter(100);
+    var counter1 = create_counter(0)
+    var counter2 = create_counter(100)
     
-    print("Counter1 first:", counter1());
-    print("Counter2 first:", counter2());
-    print("Counter1 second:", counter1());
-    print("Counter2 second:", counter2());
-    print("Counter1 third:", counter1());
-    print("Counter2 third:", counter2());
+    print("Counter1 first:", counter1())
+    print("Counter2 first:", counter2())
+    print("Counter1 second:", counter1())
+    print("Counter2 second:", counter2())
+    print("Counter1 third:", counter1())
+    print("Counter2 third:", counter2())
     '''
     
     expected = '''

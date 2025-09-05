@@ -146,15 +146,12 @@ class Parser:
         identifier_token = self.expect(TokenType.IDENTIFIER)
         first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
 
-        # if a function call is a standalone instruction, it must end with a semicolon
-        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)):
-            self.expect(TokenType.SEMICOLON)
-            return funcall_trial
+        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): return funcall_trial
         if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
 
         raise InvalidSyntax(
             (self.lexer.token.line, self.lexer.token.column),
-            "equal sign or left round or square bracket",
+            "cannot parse instruction",
             self.lexer.token.token_type,
             self.lexer.token.value
         )
@@ -205,10 +202,9 @@ class Parser:
         first_token = self.consume()
         expression = None
 
-        if not self.check_type(TokenType.SEMICOLON):
+        if not self.check_type(TokenType.CL_CURLY_BRACKET):
             expression = self.parse_expression()
 
-        self.expect(TokenType.SEMICOLON)
         return Return(expression, first_token.line, first_token.column)
 
 
@@ -227,7 +223,6 @@ class Parser:
         identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
         self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
-        self.expect(TokenType.SEMICOLON)
         return Declaration(identifier, expression, mutable, var_token.line, var_token.column)
 
 
@@ -256,7 +251,6 @@ class Parser:
 
         self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
-        self.expect(TokenType.SEMICOLON)
         return Assignment(identifier, first_index, second_index, expression, identifier.line, identifier.column)
 
 

@@ -13,16 +13,16 @@ Try it here:
 Suppose you have a Neo source file called `example.neo`:
 
 ```neo
-var firstMatrix = [1, 2, 3 | 4, 5, 6];
-var secondMatrix = [1, 2 | 3, 4 | 5, 6];
-var multiplied = firstMatrix * secondMatrix;
+var firstMatrix = [1, 2, 3 | 4, 5, 6]
+var secondMatrix = [1, 2 | 3, 4 | 5, 6]
+var multiplied = firstMatrix * secondMatrix
 
 var resultMatrix = [
   "First matrix", "Second matrix", "Multiplied", "Transposed" |
   firstMatrix, secondMatrix, multiplied, multiplied.transposed
-];
+]
 
-print(resultMatrix);
+print(resultMatrix)
 ```
 
 You can run it with:

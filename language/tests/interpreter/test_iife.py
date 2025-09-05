@@ -17,8 +17,8 @@ def test_basic_iife(capsys):
     """Test basic IIFE functionality"""
     program = """
     print(func() {
-        return 42;
-    }());
+        return 42
+    }())
     """
     expected = "42"
     run_neo_and_assert(program, expected, capsys)
@@ -27,8 +27,8 @@ def test_iife_with_parameters(capsys):
     """Test IIFE with parameters"""
     program = """
     print(func(x, y) {
-        return x + y;
-    }(10, 20));
+        return x + y
+    }(10, 20))
     """
     expected = "30"
     run_neo_and_assert(program, expected, capsys)
@@ -37,8 +37,8 @@ def test_iife_with_no_parameters(capsys):
     """Test IIFE with no parameters"""
     program = """
     print(func() {
-        return "Hello World";
-    }());
+        return "Hello World"
+    }())
     """
     expected = "Hello World"
     run_neo_and_assert(program, expected, capsys)
@@ -46,11 +46,11 @@ def test_iife_with_no_parameters(capsys):
 def test_iife_with_side_effects(capsys):
     """Test IIFE that modifies variables"""
     program = """
-    var mut x = 0;
+    var mut x = 0
     var temp = func() {
-        x = 100;
-    }();
-    print(x);
+        x = 100
+    }()
+    print(x)
     """
     expected = "100"
     run_neo_and_assert(program, expected, capsys)
@@ -60,10 +60,10 @@ def test_iife_returns_function(capsys):
     program = """
     var double_func = func() {
         return func(x) {
-            return x * 2;
-        };
-    }();
-    print(double_func(5));
+            return x * 2
+        }
+    }()
+    print(double_func(5))
     """
     expected = "10"
     run_neo_and_assert(program, expected, capsys)

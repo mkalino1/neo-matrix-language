@@ -18,7 +18,6 @@ class TokenType(Enum):
     POWER = auto()
     ASSIGN = auto()
 
-    SEMICOLON = auto()
     COMMA = auto()
     DOT = auto()
     DELIMITER = auto()
@@ -63,7 +62,6 @@ class Symbol:
         '+': TokenType.PLUS,
         '-': TokenType.MINUS,
         '^': TokenType.POWER,
-        ';': TokenType.SEMICOLON,
         ',': TokenType.COMMA,
         '.': TokenType.DOT,
         '=': TokenType.ASSIGN,

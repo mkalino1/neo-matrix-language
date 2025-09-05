@@ -64,10 +64,10 @@ onMounted(async () => {
 # Try running this example:
 
 func greet(name) {
-    print("Hello, " + name + "!");
+    print("Hello, " + name + "!")
 }
 
-greet("World");`);
+greet("World")`);
 
   // Handle Ctrl+Enter to run code
   editor.on("keydown", function(cm, event) {

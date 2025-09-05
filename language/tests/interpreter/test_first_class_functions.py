@@ -16,30 +16,30 @@ def run_neo_and_assert(program, expected_output, capsys):
 def test_function_assignment(capsys):
     program = '''
     func add(x, y) {
-        return x + y;
+        return x + y
     }
 
     func multiply(x, y) {
-        return x * y;
+        return x * y
     }
 
     func subtract(x, y) {
-        return x - y;
+        return x - y
     }
 
     # Function assignment
-    var my_add = add;
-    var my_multiply = multiply;
-    var my_subtract = subtract;
+    var my_add = add
+    var my_multiply = multiply
+    var my_subtract = subtract
 
     # Double chained function assignment
-    var my_my_add = my_add;
+    var my_my_add = my_add
 
-    print("add(5, 3):", add(5, 3));
-    print("my_add(5, 3):", my_add(5, 3));
-    print("multiply(4, 6):", multiply(4, 6));
-    print("my_multiply(4, 6):", my_multiply(4, 6));
-    print("my_my_add(5, 3):", my_my_add(5, 3));
+    print("add(5, 3):", add(5, 3))
+    print("my_add(5, 3):", my_add(5, 3))
+    print("multiply(4, 6):", multiply(4, 6))
+    print("my_multiply(4, 6):", my_multiply(4, 6))
+    print("my_my_add(5, 3):", my_my_add(5, 3))
     '''
     expected = '''
     add(5, 3): 8
@@ -53,26 +53,26 @@ def test_function_assignment(capsys):
 def test_function_reassignment(capsys):
     program = '''
     func add(x, y) {
-        return x + y;
+        return x + y
     }
 
     func multiply(x, y) {
-        return x * y;
+        return x * y
     }
 
     func subtract(x, y) {
-        return x - y;
+        return x - y
     }
 
     # Function reassignment
-    var mut operation = add;
-    print("operation(10, 5):", operation(10, 5));
+    var mut operation = add
+    print("operation(10, 5):", operation(10, 5))
 
-    operation = multiply;
-    print("After reassignment - operation(10, 5):", operation(10, 5));
+    operation = multiply
+    print("After reassignment - operation(10, 5):", operation(10, 5))
 
-    operation = subtract;
-    print("After reassignment - operation(10, 5):", operation(10, 5));
+    operation = subtract
+    print("After reassignment - operation(10, 5):", operation(10, 5))
     '''
     expected = '''
     operation(10, 5): 15
@@ -84,39 +84,39 @@ def test_function_reassignment(capsys):
 def test_function_as_return_value(capsys):
     program = '''
     func add(x, y) {
-        return x + y;
+        return x + y
     }
 
     func multiply(x, y) {
-        return x * y;
+        return x * y
     }
 
     func subtract(x, y) {
-        return x - y;
+        return x - y
     }
 
     # Function that returns a function
     func get_operation(op_type) {
         if (op_type == "add") {
-            return add;
+            return add
         } else {
             if (op_type == "multiply") {
-                return multiply;
+                return multiply
             } else {
                 if (op_type == "subtract") {
-                    return subtract;
+                    return subtract
                 }
             }
         }
     }
 
-    var mut add_func = get_operation("add");
-    var mut mult_func = get_operation("multiply");
-    var mut sub_func = get_operation("subtract");
+    var mut add_func = get_operation("add")
+    var mut mult_func = get_operation("multiply")
+    var mut sub_func = get_operation("subtract")
 
-    print("add_func(8, 2):", add_func(8, 2));
-    print("mult_func(8, 2):", mult_func(8, 2));
-    print("sub_func(8, 2):", sub_func(8, 2));
+    print("add_func(8, 2):", add_func(8, 2))
+    print("mult_func(8, 2):", mult_func(8, 2))
+    print("sub_func(8, 2):", sub_func(8, 2))
     '''
     expected = '''
     add_func(8, 2): 10
@@ -128,11 +128,11 @@ def test_function_as_return_value(capsys):
 def test_function_with_no_parameters(capsys):
     program = '''
     func constant() {
-        return 100;
+        return 100
     }
 
-    var const_func = constant;
-    print("Constant function:", const_func());
+    var const_func = constant
+    print("Constant function:", const_func())
     '''
     expected = '''
     Constant function: 100
@@ -142,11 +142,11 @@ def test_function_with_no_parameters(capsys):
 def test_function_with_multiple_parameters(capsys):
     program = '''
     func complex_op(a, b, c) {
-        return a * b + c;
+        return a * b + c
     }
 
-    var complex_func = complex_op;
-    print("Complex operation:", complex_func(2, 3, 4));
+    var complex_func = complex_op
+    print("Complex operation:", complex_func(2, 3, 4))
     '''
     expected = '''
     Complex operation: 10
@@ -156,18 +156,18 @@ def test_function_with_multiple_parameters(capsys):
 def test_function_comparison(capsys):
     program = '''
     func test_func() {
-        return 42;
+        return 42
     }
 
-    var func_ref1 = test_func;
-    var func_ref2 = test_func;
-    var func_ref3 = func_ref1;
+    var func_ref1 = test_func
+    var func_ref2 = test_func
+    var func_ref3 = func_ref1
 
-    print("func_ref1 == func_ref2:", func_ref1 == func_ref2);
-    print("func_ref1 == func_ref3:", func_ref1 == func_ref3);
-    print("func_ref1():", func_ref1());
-    print("func_ref2():", func_ref2());
-    print("func_ref3():", func_ref3());
+    print("func_ref1 == func_ref2:", func_ref1 == func_ref2)
+    print("func_ref1 == func_ref3:", func_ref1 == func_ref3)
+    print("func_ref1():", func_ref1())
+    print("func_ref2():", func_ref2())
+    print("func_ref3():", func_ref3())
     '''
     expected = '''
     func_ref1 == func_ref2: True

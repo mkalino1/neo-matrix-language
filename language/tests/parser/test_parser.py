@@ -9,17 +9,17 @@ from ...nodes.OperatorType import OperatorType
 
 def test_literals():
     neo_code = '''
-    # Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier;
+    # Literal = Bool | String | Scalar | Matrix | FunctionCall | ObjectProperty | MatrixAccess | Identifier
 
-    var a = [1, 2 | 4, 5];
-    var b = 5;
-    var c = True;
-    var d = "Hello";
-    var e = myfun("argument");
-    var f = obj.method;
-    var g = matrix[3, 4];
-    var h = matrix[2];
-    var j = some_variable;
+    var a = [1, 2 | 4, 5]
+    var b = 5
+    var c = True
+    var d = "Hello"
+    var e = myfun("argument")
+    var f = obj.method
+    var g = matrix[3, 4]
+    var h = matrix[2]
+    var j = some_variable
     '''
     parser = Parser(Lexer(SourceString(neo_code)))
     assignments = (x for x in parser.parse_program().toplevel_objects)
@@ -37,17 +37,17 @@ def test_literals():
 
 def test_order_of_operations():
     neo_code = '''
-    var a = (1 + 2) * 3;
-    a = 1 + (2 * 3);
-    a = 1 + 2 * 3;
+    var mut a = (1 + 2) * 3
+    a = 1 + (2 * 3)
+    a = 1 + 2 * 3
 
-    a = 1 <= 2 == 3 >= 4;
+    a = 1 <= 2 == 3 >= 4
 
-    a = 1 <= 2 == 3 >= 4 and 1 <= 2 == 3 >= 4;
+    a = 1 <= 2 == 3 >= 4 and 1 <= 2 == 3 >= 4
 
-    a = 10 - some_variable;
+    a = 10 - some_variable
 
-    a = not (10 == ten);
+    a = not (10 == ten)
     '''
     parser = Parser(Lexer(SourceString(neo_code)))
     objects = (x for x in parser.parse_program().toplevel_objects)
@@ -75,10 +75,10 @@ def test_function():
     neo_code = '''
     func example(raz, dwa){
         if(3){
-            return matrix.det;
+            return matrix.det
         }
         else {
-            add("nothing");
+            add("nothing")
         }
     }
     '''

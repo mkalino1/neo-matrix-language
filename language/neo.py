@@ -11,15 +11,17 @@ args = parser.parse_args()
 
 # Default source string if no filename provided
 source_string = """
-func create_adder(base) {
-    func add(value) {
-        return base + value;
+func create_counter() {
+    var mut count = 0
+    return func() {
+        count = count + 1
+        print(count)
     }
-    return add;
 }
-var adder = create_adder(10);
-print(adder(5));
-print(adder(7));
+
+var counter = create_counter()
+counter()
+counter()
 """
 
 # Use SourceFile if filename provided, otherwise use SourceString

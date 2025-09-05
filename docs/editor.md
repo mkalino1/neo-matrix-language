@@ -23,19 +23,19 @@ Here are some examples you can try in the editor:
 ### Basic Function
 ```neo
 func greet(name) {
-    print("Hello, " + name + "!");
+    print("Hello, " + name + "!")
 }
 
-greet("World");
+greet("World")
 ```
 
 ### Control Flow
 ```neo
-let age = 18;
+let age = 18
 if (age >= 18) {
-    print("You are an adult");
+    print("You are an adult")
 } else {
-    print("You are a minor");
+    print("You are a minor")
 }
 ```
 

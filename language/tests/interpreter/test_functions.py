@@ -17,13 +17,13 @@ def test_recursive_fibonacci(capsys):
     program = '''
     func fibonnaci(n){
        if (n <= 1){
-            return n;
+            return n
        }
        else{
-           return fibonnaci(n-1) + fibonnaci(n-2);
+           return fibonnaci(n-1) + fibonnaci(n-2)
        }
     }
-    print(fibonnaci(10));
+    print(fibonnaci(10))
     '''
     expected = '''
     55
@@ -34,13 +34,13 @@ def test_recursive_factorial(capsys):
     program = '''
     func factorial(n){
        if (n == 1){
-            return n;
+            return n
        }
        else{
-           return n*factorial(n-1);
+           return n*factorial(n-1)
        }
     }
-    print(factorial(5));
+    print(factorial(5))
     '''
     expected = '''
     120
@@ -49,16 +49,16 @@ def test_recursive_factorial(capsys):
 
 def test_function_scope_and_shadowing(capsys):
     program = '''
-    var mut a = 2;
-    var arg = 0;
+    var mut a = 2
+    var arg = 0
     func scope(arg){
-        print(a);
-        a = 4;
-        print(a);
-        print(arg);
+        print(a)
+        a = 4
+        print(a)
+        print(arg)
     }
-    scope(8);
-    print(arg);
+    scope(8)
+    print(arg)
     '''
     expected = '''
     2
@@ -70,24 +70,24 @@ def test_function_scope_and_shadowing(capsys):
 
 def test_function_scope_reassignment_error(capsys):
     program = '''
-    var a = 2;
+    var a = 2
     func scope(){
-        a = 4;
+        a = 4
     }
-    scope();
+    scope()
     '''
     run_neo_and_assert(program, "Error at line: 4, column: 9. Variable 'a' is immutable and cannot be assigned to", capsys)
 
 def test_function_call_with_expression_args(capsys):
     program = '''
     func test(arg1, arg2){
-        print(arg1);
-        print(arg2);
+        print(arg1)
+        print(arg2)
     }
-    test("kra"+"kow", "" or 4);
+    test("kra"+"kow", "" or 4)
     '''
     expected = '''
     krakow
     4
     '''
-    run_neo_and_assert(program, expected, capsys) 
+    run_neo_and_assert(program, expected, capsys)
