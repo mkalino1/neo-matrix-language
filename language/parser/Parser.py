@@ -125,10 +125,9 @@ class Parser:
 
 
     def try_parse_instruction(self):
-        types_to_check = [TokenType.IF, TokenType.WHILE, TokenType.OP_CURLY_BRACKET, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.VAR_DECLARATION, TokenType.FUNCTION]
-        if any([self.check_type(t) for t in types_to_check]):
-            return self.parse_instruction()
-        return None
+        if self.check_type(TokenType.EOF):
+            return None
+        return self.parse_instruction()
 
 
     def parse_instruction(self):
@@ -141,13 +140,12 @@ class Parser:
         if (return_trial := self.try_parse_return()): return return_trial
         if (function_trial := self.try_parse_function_definition_or_iife()): return function_trial
         if (declaration_trial := self.try_parse_declaration()): return declaration_trial
-
-        # in that case, the instruction should start with an identifier
-        identifier_token = self.expect(TokenType.IDENTIFIER)
-        first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
-
-        if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): return funcall_trial
-        if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
+        if self.check_type(TokenType.IDENTIFIER):
+            identifier_token = self.consume()
+            first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
+            if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): return funcall_trial
+            if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
+        if (expression_trial := self.parse_expression()): return expression_trial
 
         raise InvalidSyntax(
             (self.lexer.token.line, self.lexer.token.column),
