@@ -185,6 +185,10 @@ class Visitor:
 
 
     def visit_identifier(self, identifier:Identifier):
+        # First check builtin functions
+        if identifier.value in builtin_functions:
+            return builtin_functions[identifier.value]
+        # Then check scopes
         for scope in self.scopes[::-1]:
             if identifier.value in scope:
                 value, _ = scope[identifier.value]
