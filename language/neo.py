@@ -11,17 +11,11 @@ args = parser.parse_args()
 
 # Default source string if no filename provided
 source_string = """
-func create_counter() {
-    var mut count = 0
-    return func() {
-        count = count + 1
-        print(count)
-    }
+func greet(name) {
+    return "Hello, " + name
 }
 
-var counter = create_counter()
-counter()
-counter()
+"World" |> greet |> print
 """
 
 # Use SourceFile if filename provided, otherwise use SourceString

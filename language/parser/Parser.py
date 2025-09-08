@@ -254,7 +254,8 @@ class Parser:
 
     def parse_expression(self):
         """
-        Expression     = Equality ( ( "and" | "or" ) Equality )*;
+        Expression     = Pipe ( ( "and" | "or" ) Pipe )*;
+        Pipe           = Equality ( "|>" Equality )* ;
         Equality       = Comparison ( "==" Comparison )* ;
         Comparison     = Term ( ( ">" | ">=" | "<" | "<=" ) Term )* ;
         Term           = Factor ( ( "-" | "+" ) Factor )* ;
@@ -263,9 +264,23 @@ class Parser:
         Primary        = Literal | "(" Expression ")" ; 
         Literal        = Bool | String | Scalar | Matrix | Function | FunctionCall | ObjectProperty | MatrixAccess | Identifier; 
         """
-        l_expression = self.parse_equality()
+        l_expression = self.parse_pipe()
 
         while self.check_type(TokenType.AND) or self.check_type(TokenType.OR):
+            token = self.consume()
+            op = to_operator_type[token.value]
+            r_expression = self.parse_pipe()
+            l_expression = BinaryOperator(l_expression, op, r_expression, token.line, token.column)
+        return l_expression
+
+
+    def parse_pipe(self):
+        """
+        Pipe           = Equality ( "|>" Equality )* ;
+        """
+        l_expression = self.parse_equality()
+
+        while self.check_type(TokenType.PIPE):
             token = self.consume()
             op = to_operator_type[token.value]
             r_expression = self.parse_equality()

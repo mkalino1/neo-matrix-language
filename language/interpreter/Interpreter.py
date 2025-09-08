@@ -319,6 +319,23 @@ class Visitor:
             except TypeError:
                 raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '<=' operator", binary.lvalue.line, binary.lvalue.column)
 
+        if binary.op == OperatorType.PIPE:
+            # Pipe operator: left |> right
+            # Create a function call with left as the first argument and delegate to visit_function_call
+            
+            if isinstance(binary.rvalue, Identifier):
+                # Create a function call with left as the first argument
+                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
+                return temp_function_call.accept(self)
+            
+            elif isinstance(binary.rvalue, Function):
+                # Create a function call with left as the first argument
+                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
+                return temp_function_call.accept(self)
+            
+            else:
+                raise NeoRuntimeError("Right side of pipe operator must be a function", binary.rvalue.line, binary.rvalue.column)
+
         raise NeoRuntimeError("Unknown binary operator", binary.line, binary.column)
 
 

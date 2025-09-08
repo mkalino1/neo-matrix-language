@@ -22,7 +22,7 @@ var resultMatrix = [
   firstMatrix, secondMatrix, multiplied, multiplied.transposed
 ]
 
-print(resultMatrix)
+resultMatrix |> print
 ```
 
 You can run it with:

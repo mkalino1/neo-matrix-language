@@ -36,6 +36,7 @@ class TokenType(Enum):
     EQUAL_TO = auto()
     NOT_EQUAL_TO = auto()
     DIVIDE_INTEGER = auto()
+    PIPE = auto()
 
     AND = auto()
     OR = auto()
@@ -73,7 +74,8 @@ class Symbol:
         '>=': TokenType.GREATER_OR_EQUAL_TO,
         '==': TokenType.EQUAL_TO,
         '!=': TokenType.NOT_EQUAL_TO,
-        '//': TokenType.DIVIDE_INTEGER
+        '//': TokenType.DIVIDE_INTEGER,
+        '|>': TokenType.PIPE
     }
 
     reserved_words = {

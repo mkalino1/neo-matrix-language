@@ -20,6 +20,7 @@ class OperatorType(Enum):
     AND = auto()
     OR = auto()
     NOT = auto()
+    PIPE = auto()
 
 
 to_operator_type = {
@@ -41,4 +42,5 @@ to_operator_type = {
     'and': OperatorType.AND,
     'or': OperatorType.OR,
     'not': OperatorType.NOT,
+    '|>': OperatorType.PIPE,
 }
