@@ -9,7 +9,7 @@ class Assignment(Node):
         self.expression = right_expression
 
     def __repr__(self):
-        return f'{self.__class__.__name__}: {self.identifier} {self.expression}'
+        return f'{self.__class__.__name__}: {self.identifier} {self.expression} [{self.first_index}, {self.second_index}]'
 
     def accept(self, visitor):
         return visitor.visit_assignment(self) 

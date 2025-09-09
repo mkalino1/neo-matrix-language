@@ -140,11 +140,6 @@ class Parser:
         if (return_trial := self.try_parse_return()): return return_trial
         if (function_trial := self.try_parse_function_definition_or_iife()): return function_trial
         if (declaration_trial := self.try_parse_declaration()): return declaration_trial
-        if self.check_type(TokenType.IDENTIFIER):
-            identifier_token = self.consume()
-            first_identifier = Identifier(identifier_token.value, identifier_token.line, identifier_token.column)
-            if (funcall_trial := self.try_parse_functioncall_with_consumed_identifier(first_identifier)): return funcall_trial
-            if (assign_trial := self.try_parse_assignment_with_consumed_identifier(first_identifier)): return assign_trial
         if (expression_trial := self.parse_expression()): return expression_trial
 
         raise InvalidSyntax(
@@ -236,7 +231,7 @@ class Parser:
         return FunctionCall(first_identifier, arguments, first_identifier.line, first_identifier.column)
 
 
-    def try_parse_assignment_with_consumed_identifier(self, identifier):
+    def try_parse_assignment_or_matrix_access_with_consumed_identifier(self, identifier):
         """
         Assignment = (Access | Identifier) '=' Expression ';' ;
         """
@@ -244,8 +239,11 @@ class Parser:
             return None
 
         first_index, second_index = None, None
-        if access := self.try_parse_access_with_consumed_identifier(identifier):
+        if access := self.try_parse_matrix_access_with_consumed_identifier(identifier):
             first_index, second_index = access.first, access.second
+
+        if not self.check_type(TokenType.ASSIGN):
+            return access
 
         self.expect(TokenType.ASSIGN)
         expression = self.parse_expression()
@@ -405,7 +403,7 @@ class Parser:
             identifier = Identifier(token.value, token.line, token.column)
             if (functioncall_trial := self.try_parse_functioncall_with_consumed_identifier(identifier)): return functioncall_trial
             if (property_trial := self.try_parse_property_with_consumed_identifier(identifier)): return property_trial
-            if (access_trial := self.try_parse_access_with_consumed_identifier(identifier)): return access_trial
+            if (assign_trial := self.try_parse_assignment_or_matrix_access_with_consumed_identifier(identifier)): return assign_trial
             return identifier
         return None
 
@@ -471,7 +469,7 @@ class Parser:
         return Property(first_identifier, second_identifier, first_identifier.line, first_identifier.column)
 
 
-    def try_parse_access_with_consumed_identifier(self, identifier):
+    def try_parse_matrix_access_with_consumed_identifier(self, identifier):
         """
         MatrixAccess = Identifier '[' Scalar ',' Scalar ']' | Identifier '[' Scalar ']'
         """
