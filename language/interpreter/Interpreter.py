@@ -198,15 +198,9 @@ class Visitor:
 
 
     def visit_matrix(self, matrix:Matrix):
-        values = []
         for row in matrix.rows:
-            values_row = []
-            for cell in row:
-                value = cell.accept(self)
-                values_row.append(value)
-            values.append(values_row)
-
-        matrix.rows = values
+            for i, cell in enumerate(row):
+                row[i] = cell.accept(self)
         return matrix
 
 
@@ -250,6 +244,21 @@ class Visitor:
 
 
     def visit_binary_operator(self, binary:BinaryOperator):
+        # Special handling for pipe operator - don't evaluate left side yet
+        if binary.op == OperatorType.PIPE:
+            if isinstance(binary.rvalue, Identifier):
+                # Create a function call with left as the argument
+                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
+                return temp_function_call.accept(self)
+            
+            elif isinstance(binary.rvalue, Function):
+                # Create a function call with left as the first argument
+                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
+                return temp_function_call.accept(self)
+            
+            else:
+                raise NeoRuntimeError("Right side of pipe operator must be a function", binary.rvalue.line, binary.rvalue.column)
+        
         left = binary.lvalue.accept(self)
         right = binary.rvalue.accept(self)
 
@@ -318,23 +327,6 @@ class Visitor:
                 return left <= right
             except TypeError:
                 raise NeoRuntimeError(f"Types '{type(left).__name__}' and '{type(right).__name__}' cannot be compared with '<=' operator", binary.lvalue.line, binary.lvalue.column)
-
-        if binary.op == OperatorType.PIPE:
-            # Pipe operator: left |> right
-            # Create a function call with left as the first argument and delegate to visit_function_call
-            
-            if isinstance(binary.rvalue, Identifier):
-                # Create a function call with left as the first argument
-                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
-                return temp_function_call.accept(self)
-            
-            elif isinstance(binary.rvalue, Function):
-                # Create a function call with left as the first argument
-                temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
-                return temp_function_call.accept(self)
-            
-            else:
-                raise NeoRuntimeError("Right side of pipe operator must be a function", binary.rvalue.line, binary.rvalue.column)
 
         raise NeoRuntimeError("Unknown binary operator", binary.line, binary.column)
 
