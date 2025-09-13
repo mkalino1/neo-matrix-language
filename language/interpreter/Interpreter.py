@@ -263,6 +263,8 @@ class Visitor:
         right = binary.rvalue.accept(self)
 
         if binary.op == OperatorType.PLUS:
+            if isinstance(left, str) or isinstance(right, str):
+                return str(left) + str(right)
             return left + right
         elif binary.op == OperatorType.MINUS:
             if isinstance(left, str) or isinstance(right, str):
