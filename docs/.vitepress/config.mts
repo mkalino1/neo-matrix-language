@@ -2,10 +2,15 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Neo Language",
-  description: "Docs and online editor for Neo programming language",
+  title: "Neo Matrix Language",
+  description: "A friendly functional programming language with matrix operations",
+  head: [
+    ['link', { rel: 'icon', href: '/logo.png' }],
+  ],
+
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.png',
+
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Editor', link: '/editor' }
