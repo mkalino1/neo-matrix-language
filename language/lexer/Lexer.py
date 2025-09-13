@@ -51,7 +51,7 @@ class Lexer:
     def try_build_identifier_or_reserved_word(self, position):
         chars = []
         if self.source.current_char.isalpha():
-            while self.source.current_char.isalpha() or self.source.current_char.isdigit() or self.source.current_char == '_':
+            while self.source.current_char.isalpha() or self.source.current_char.isdigit() or self.source.current_char == '_' or self.source.current_char == '-':
                 if len(chars) >= self.MAX_IDENTIFIER_LENGHT:
                     raise LexerError(ErrorCode.EXCEED_MAX_IDENTIFIER_LENGHT, position)
                 chars.append(self.source.current_char)
