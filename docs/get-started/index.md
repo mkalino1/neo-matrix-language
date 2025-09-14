@@ -59,4 +59,4 @@ Ready to start coding? Here are your options:
 
 **[Learn the Basics](/get-started/quick-start)** - Follow tutorial
 
-**[Explore Examples](/examples/)** - See what's possible with Neo
+**Explore examples** - See what's possible with Neo
