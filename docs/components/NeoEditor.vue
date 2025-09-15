@@ -1,23 +1,33 @@
 <template>
   <div class="neo-editor">
-    <div class="main-content">
-      <div class="editor-section">
-        <div class="section-title">Code Editor</div>
-        <textarea ref="codeEditor" id="codeEditor"></textarea>
-        <button class="run-button" @click="runCode" :disabled="isRunning" id="runButton">
-          ▶ {{ isRunning ? 'Running...' : 'Run Code' }}
-        </button>
-        <div class="loading" v-if="isRunning">
-          <div class="spinner"></div>
-          <div>Executing code...</div>
-        </div>
+    <div class="section-header">
+      <h3 class="section-title">Code Editor</h3>
+      <button class="run-button" @click="runCode" :disabled="isRunning" id="runButton">
+        <svg v-if="!isRunning" class="icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg v-else class="icon spinner" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        {{ isRunning ? 'Running...' : 'Run Code' }}
+      </button>
+    </div>
+    <div class="editor-container">
+      <textarea ref="codeEditor" id="codeEditor"></textarea>
+    </div>
+    <div class="loading" v-if="isRunning">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <span>Executing code...</span>
       </div>
-      
-      <div class="output-section">
-        <div class="section-title">Output</div>
-        <div class="output-area" id="outputArea">
-          {{ output || '# Output will appear here after running your code' }}
-        </div>
+    </div>
+  
+    <div class="section-header">
+      <h3 class="section-title">Output</h3>
+    </div>
+    <div class="output-container">
+      <div class="output-area" id="outputArea">
+        {{ output || '# Output will appear here after running your code' }}
       </div>
     </div>
   </div>
@@ -155,85 +165,144 @@ async function runCode() {
 <style scoped>
 .neo-editor {
   margin: 2rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
 }
 
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  min-height: 600px;
-}
-
-.editor-section {
-  padding: 20px;
-}
-
-.output-section {
-  padding: 20px;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  background: var(--vp-c-bg-soft);
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 .section-title {
-  font-size: 1.3em;
-  margin-bottom: 15px;
+  font-size: 1.1rem;
   font-weight: 600;
+  margin: 0;
+  color: var(--vp-c-text-1);
+}
+
+.editor-container, 
+.output-container {
+  padding: 1.5rem;
+  background: var(--vp-c-bg);
 }
 
 :deep(.CodeMirror) {
-  height: 400px;
+  height: 350px;
   border-radius: 8px;
   font-size: 14px;
+  border: 1px solid var(--vp-c-divider);
+}
+
+:deep(.CodeMirror-focused) {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 0 0 2px var(--vp-c-brand-1-soft);
 }
 
 .run-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   color: white;
-  background-color: #272822;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  background: var(--vp-c-brand-1);
+  border: 1px solid var(--vp-c-brand-1);
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  margin-top: 15px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  
+  &:hover:not(:disabled) {
+    background: var(--vp-c-brand-2);
+    border-color: var(--vp-c-brand-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid var(--vp-c-brand-1);
+    outline-offset: 2px;
+  }
+  
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
 }
 
-.run-button:hover:not(:disabled) {
-  background-color: #373832;
-  transform: translateY(-1px);
-}
-
-.run-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.dark .run-button {
+  color: black;
 }
 
 .output-area {
-  background: #272822;
-  padding: 15px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  padding: 1rem;
   border-radius: 8px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  min-height: 400px;
+  font-family: var(--vp-font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  min-height: 200px;
   white-space: pre-wrap;
   overflow-y: auto;
+  color: var(--vp-c-text-1);
 }
 
 .loading {
-  text-align: center;
-  padding: 20px;
-  color: #667eea;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  
+  .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--vp-c-brand-1);
+    font-weight: 500;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--vp-c-divider);
+    border-top: 2px solid var(--vp-c-brand-1);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
 }
 
-.spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 10px;
+.dark .loading {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 @keyframes spin {
@@ -242,8 +311,17 @@ async function runCode() {
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    grid-template-columns: 1fr;
+  .editor-container,
+  .output-container {
+    padding: 1rem;
+  }
+  
+  :deep(.CodeMirror) {
+    height: 250px;
+  }
+  
+  .output-area {
+    min-height: 150px;
   }
 }
 </style>
