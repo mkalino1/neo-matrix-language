@@ -15,12 +15,6 @@
     <div class="editor-container">
       <textarea ref="codeEditor" id="codeEditor"></textarea>
     </div>
-    <div class="loading" v-if="isRunning">
-      <div class="loading-content">
-        <div class="spinner"></div>
-        <span>Executing code...</span>
-      </div>
-    </div>
   
     <div class="section-header">
       <h3 class="section-title">Output</h3>
@@ -28,6 +22,12 @@
     <div class="output-container">
       <div class="output-area" id="outputArea">
         {{ output || '# Output will appear here after running your code' }}
+      </div>
+      <div class="loading" v-if="isRunning">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <span>Executing code...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -180,6 +180,7 @@ async function runCode() {
   padding: 0.8rem 1.5rem;
   background: var(--vp-c-bg-soft);
   border-bottom: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
 }
 
 .section-title {
@@ -191,8 +192,9 @@ async function runCode() {
 
 .editor-container, 
 .output-container {
-  padding: 1.5rem;
+  padding: 18px;
   background: var(--vp-c-bg);
+  position: relative;
 }
 
 :deep(.CodeMirror) {
@@ -281,6 +283,7 @@ async function runCode() {
   align-items: center;
   justify-content: center;
   z-index: 10;
+  border-radius: 12px;
   
   .loading-content {
     display: flex;
