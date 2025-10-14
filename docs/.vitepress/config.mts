@@ -25,6 +25,12 @@ export default defineConfig({
           { text: 'Editor', link: '/editor' },
           { text: 'Quick Start', link: '/get-started/quick-start' }
         ]
+      },
+      {
+        text: 'Functions',
+        items: [
+          { text: 'Function Declaration', link: '/functions/declaration' }
+        ]
       }
     ],
 
