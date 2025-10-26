@@ -250,6 +250,10 @@ class Visitor:
                 # Create a function call with left as the argument
                 temp_function_call = FunctionCall(binary.rvalue, [binary.lvalue], binary.line, binary.column)
                 return temp_function_call.accept(self)
+
+            elif isinstance(binary.rvalue, FunctionCall):
+                temp_function_call = FunctionCall(binary.rvalue.function_name_or_body, [binary.lvalue] + binary.rvalue.arguments, binary.line, binary.column)
+                return temp_function_call.accept(self)
             
             elif isinstance(binary.rvalue, Function):
                 # Create a function call with left as the first argument
