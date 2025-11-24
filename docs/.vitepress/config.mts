@@ -31,6 +31,12 @@ export default defineConfig({
         items: [
           { text: 'Function Declaration', link: '/functions/declaration' }
         ]
+      },
+      {
+        text: 'Motivation',
+        items: [
+          { text: 'Why?', link: '/motivation/why' }
+        ]
       }
     ],
 
