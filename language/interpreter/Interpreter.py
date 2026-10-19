@@ -4,28 +4,62 @@ from language.nodes.Expressions import Access, BinaryOperator, Identifier, Matri
 from language.nodes.OperatorType import OperatorType
 from language.errors.InterpreterExceptions import NeoRuntimeError
 from language.interpreter.Built_ins import builtin_functions
+from language.interpreter.utils import check_string_concatenation_size
 import copy
 
 class Interpreter():
-    def __init__(self, parsed_program):
+    def __init__(
+        self,
+        parsed_program,
+        max_steps=None,
+        max_output_length=None,
+        max_string_length=None
+    ):
         self.parsed_objects = parsed_program.toplevel_objects
-        self.visitor = Visitor()
+        self.error = None
+        self.visitor = Visitor(
+            max_steps,
+            max_output_length,
+            max_string_length
+        )
 
-    def run(self):
+    def run(self, error_stream=None):
         for top_level_object in self.parsed_objects:
             try:
                 top_level_object.accept(self.visitor)
             except NeoRuntimeError as e:
-                print(e)
-                return
+                self.error = e
+                print(e, file=error_stream)
+                return False
+        return True
   
 
 class Visitor:
-    def __init__(self):
+    def __init__(
+        self,
+        max_steps=None,
+        max_output_length=None,
+        max_string_length=None
+    ):
         self.scopes = [{}]
+        self.max_steps = max_steps
+        self.max_output_length = max_output_length
+        self.max_string_length = max_string_length
+        self.steps = 0
 
+    def _tick(self, node):
+        if self.max_steps is None:
+            return
+        self.steps += 1
+        if self.steps > self.max_steps:
+            raise NeoRuntimeError(
+                "Execution step limit exceeded",
+                getattr(node, "line", None),
+                getattr(node, "column", None)
+            )
 
     def visit_function_definition(self, function:Function):
+        self._tick(function)
         if function.name and function.name.value in builtin_functions:
             raise NeoRuntimeError(f"Function name '{function.name.value}' is reserved for build-in function", function.name.line, function.name.column)
 
@@ -37,6 +71,7 @@ class Visitor:
 
 
     def visit_function_call(self, function_call:FunctionCall):
+        self._tick(function_call)
         line = function_call.function_name_or_body.line
         column = function_call.function_name_or_body.column
 
@@ -51,7 +86,15 @@ class Visitor:
             # Look for function name in builtin functions
             if function_name in builtin_functions:
                 builtin_function = builtin_functions[function_name]
-                return builtin_function(line, column, *[arg.accept(self) for arg in function_call.arguments])
+                arguments = [arg.accept(self) for arg in function_call.arguments]
+                if function_name == "print":
+                    return builtin_function(
+                        line,
+                        column,
+                        *arguments,
+                        max_output_length=self.max_output_length
+                    )
+                return builtin_function(line, column, *arguments)
 
             # Look for function name in scopes
             function = None
@@ -79,6 +122,7 @@ class Visitor:
         return return_value
 
     def visit_block(self, block:Block):
+        self._tick(block)
         if block.closure:
             self.scopes.append(block.closure)
 
@@ -106,6 +150,7 @@ class Visitor:
 
 
     def visit_if_statement(self, if_statement:IfStatement):
+        self._tick(if_statement)
         condition = if_statement.condition.accept(self)
 
         if condition:
@@ -115,6 +160,7 @@ class Visitor:
 
 
     def visit_while_loop(self, while_loop:WhileLoop):
+        self._tick(while_loop)
         condition = while_loop.condition.accept(self)
 
         return_value = None
@@ -127,12 +173,14 @@ class Visitor:
 
 
     def visit_return(self, return_instruction:Return):
+        self._tick(return_instruction)
         if return_instruction.expression is None:
             return None
         return return_instruction.expression.accept(self)
 
 
     def visit_assignment(self, assignment:Assignment):
+        self._tick(assignment)
         expression_value = assignment.expression.accept(self)
 
         if not assignment.first_index:
@@ -177,6 +225,7 @@ class Visitor:
 
 
     def visit_declaration(self, declaration:Declaration):
+        self._tick(declaration)
         identifier = declaration.identifier.value
         if identifier in self.scopes[-1]:
             raise NeoRuntimeError(f"Variable '{identifier}' already declared in this scope", declaration.line, declaration.column)
@@ -185,6 +234,7 @@ class Visitor:
 
 
     def visit_identifier(self, identifier:Identifier):
+        self._tick(identifier)
         # First check builtin functions
         if identifier.value in builtin_functions:
             return builtin_functions[identifier.value]
@@ -198,6 +248,7 @@ class Visitor:
 
 
     def visit_matrix(self, matrix:Matrix):
+        self._tick(matrix)
         for row in matrix.rows:
             for i, cell in enumerate(row):
                 row[i] = cell.accept(self)
@@ -205,6 +256,7 @@ class Visitor:
 
 
     def visit_access(self, access:Access):
+        self._tick(access)
         matrix = access.identifier.accept(self)
 
         if not (access.first.value.is_integer() and access.second.value.is_integer()):
@@ -217,6 +269,7 @@ class Visitor:
                 
 
     def visit_property(self, property:Property):
+        self._tick(property)
         object = property.object_name.accept(self)
 
         if not isinstance(object, Matrix):
@@ -231,6 +284,7 @@ class Visitor:
 
 
     def visit_unary_operator(self, unary:UnaryOperator):
+        self._tick(unary)
         right = unary.rvalue.accept(self)
 
         # Matrix handling is done through __neg__
@@ -244,6 +298,7 @@ class Visitor:
 
 
     def visit_binary_operator(self, binary:BinaryOperator):
+        self._tick(binary)
         # Special handling for pipe operator - don't evaluate left side yet
         if binary.op == OperatorType.PIPE:
             if isinstance(binary.rvalue, Identifier):
@@ -268,6 +323,12 @@ class Visitor:
 
         if binary.op == OperatorType.PLUS:
             if isinstance(left, str) or isinstance(right, str):
+                check_string_concatenation_size(
+                    left,
+                    right,
+                    binary,
+                    self.max_string_length
+                )
                 return str(left) + str(right)
             return left + right
         elif binary.op == OperatorType.MINUS:
@@ -339,4 +400,5 @@ class Visitor:
 
         # Scalar or bool or string
     def visit_literal(self, literal):
+        self._tick(literal)
         return literal.value
