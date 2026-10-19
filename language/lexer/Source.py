@@ -9,7 +9,11 @@ class SourceFile():
 
 
     def __del__(self):
-        self.file.close()
+        self.close()
+
+    def close(self):
+        if hasattr(self, "file"):
+            self.file.close()
         
 
     def move_to_next_char(self):
